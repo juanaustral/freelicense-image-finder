@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FreeLicense Image Finder</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f3;
+  --surface:#fff;
+  --text:#1c1917;
+  --text-dim:#78716c;
+  --text-muted:#a8a29e;
+  --accent:#0d9488;
+  --accent-hover:#0f766e;
+  --accent-light:#f0fdfa;
+  --accent-border:#99f6e4;
+  --accent-glow:rgba(13,148,136,.12);
+  --border:#e7e5e4;
+  --radius-sm:8px;
+  --radius:10px;
+  --radius-lg:16px;
+  --gap:14px;
+  --max-w:1200px;
+  --shadow:0 1px 3px rgba(0,0,0,.05);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.07);
+  --font:400 14px/1.6 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+body{
+  font:var(--font);color:var(--text);
+  background:var(--bg);min-height:100vh;
+}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 var(--gap)}
+
+/* ── header ───────────────────────────────── */
+.header{
+  background:linear-gradient(135deg,#fdfbfa 0%,#f8f6f3 100%);
+  border-bottom:1px solid var(--border);
+  padding:24px 0 18px;margin-bottom:22px;
+  position:relative;
+}
+.header::after{
+  content:'';position:absolute;bottom:-1px;left:10%;right:10%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.25;
+}
+.header-inner{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  max-width:var(--max-w);margin:0 auto;padding:0 var(--gap);
+}
+.header-left{flex:1}
+.header-brand{display:flex;align-items:center;gap:10px;margin-bottom:1px}
+.header-brand .mark{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),#14b8a6);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:700;flex-shrink:0;
+}
+.header-title{font-size:20px;font-weight:700;letter-spacing:-.025em;color:var(--text)}
+.header-sub{font-size:12px;color:var(--text-dim);margin-top:1px;margin-left:38px}
+.header-sub a{color:var(--accent);text-decoration:none;font-weight:500}
+.header-sub a:hover{color:var(--accent-hover)}
+
+/* lang toggle */
+.lang-switch{display:flex;gap:2px;background:var(--border);border-radius:6px;padding:2px;flex-shrink:0;margin-top:3px}
+.lang-btn{
+  padding:4px 11px;border:none;border-radius:5px;font-size:11px;font-weight:600;
+  cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s;
+  font-family:inherit;
+}
+.lang-btn.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+/* ── tip ──────────────────────────────────── */
+.tip{
+  background:var(--accent-light);border:1px solid var(--accent-border);
+  border-radius:var(--radius-sm);padding:9px 13px;
+  font-size:12px;color:var(--text-dim);line-height:1.55;
+  margin-bottom:16px;display:flex;align-items:center;gap:7px;
+}
+.tip .tip-icon{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--accent-border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tip .tip-icon svg{width:14px;height:14px;color:var(--accent)}
+.tip strong{color:var(--text)}
+.tip code{
+  background:var(--surface);padding:1px 5px;border-radius:4px;
+  font-size:11px;font-family:inherit;color:var(--accent);border:1px solid var(--accent-border);
+}
+
+/* ── search ───────────────────────────────── */
+.search-row{display:flex;gap:6px;margin-bottom:13px}
+.search-row input[type=text]{
+  flex:1;padding:11px 15px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;background:var(--surface);outline:none;
+  transition:border-color .2s,box-shadow .2s;font-family:inherit;
+}
+.search-row input[type=text]:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-glow);
+}
+.search-row button{
+  padding:11px 24px;background:var(--accent);color:#fff;border:none;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;
+  transition:background .2s,transform .1s;white-space:nowrap;font-family:inherit;
+}
+.search-row button:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.search-row button:active{transform:translateY(0)}
+.search-row button:disabled{opacity:.5;cursor:default;transform:none}
+
+/* ── filters ──────────────────────────────── */
+.filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:17px}
+.chip{
+  padding:5px 13px;border:1px solid var(--border);border-radius:20px;
+  font-size:12px;font-weight:500;cursor:pointer;background:var(--surface);
+  color:var(--text-dim);transition:all .18s;user-select:none;font-family:inherit;
+}
+.chip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* info */
+.info{font-size:12px;color:var(--text-dim);margin-bottom:16px;min-height:18px}
+
+/* ── gallery ──────────────────────────────── */
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;margin-bottom:24px;
+}
+
+/* ── card ─────────────────────────────────── */
+.card{
+  background:var(--surface);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);
+  transition:box-shadow .25s,transform .2s;
+}
+.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.card-img{
+  aspect-ratio:4/3;overflow:hidden;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:#f0eeeb;position:relative;
+}
+.card-img::after{
+  content:'↗';position:absolute;top:8px;right:8px;
+  width:24px;height:24px;border-radius:5px;
+  background:rgba(0,0,0,.35);color:rgba(255,255,255,.8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;opacity:0;transition:opacity .2s;
+}
+.card:hover .card-img::after{opacity:1}
+.card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.card:hover .card-img img{transform:scale(1.05)}
+.card-img img[src=""],.card-img img:not([src]){opacity:0}
+.card-foot{
+  padding:8px 10px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+}
+.card-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;color:var(--text-dim);min-height:16px;
+}
+.card-meta .author{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%;
+  font-weight:500;color:var(--text);
+}
+.card-meta .author a{color:var(--text);text-decoration:none}
+.card-meta .author a:hover{color:var(--accent)}
+.card-meta .license{white-space:nowrap;font-size:10px;color:var(--text-muted)}
+.card-actions{display:flex;gap:4px}
+.action-btn{
+  width:30px;height:25px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:5px;background:var(--surface);
+  cursor:pointer;color:var(--text-muted);padding:0;
+  transition:all .15s;
+}
+.action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.action-btn svg{width:13px;height:13px;display:block}
+
+/* ── load more ────────────────────────────── */
+.load-wrap{text-align:center;margin-bottom:44px}
+.btn-load{
+  padding:10px 34px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .2s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;
+  color:var(--text);box-shadow:var(--shadow);
+}
+.btn-load:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);transform:translateY(-1px)}
+.btn-load:active{transform:translateY(0)}
+.btn-load:disabled{opacity:.4;cursor:default;transform:none}
+.spinner{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+.btn-load.loading .spinner{display:inline-block}
+.btn-load.loading .lbl{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── states ───────────────────────────────── */
+.empty{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty p{margin-top:6px;font-size:13px}
+
+/* ── footer ───────────────────────────────── */
+.footer{
+  text-align:center;font-size:11px;color:var(--text-muted);
+  padding:22px 0 30px;border-top:1px solid var(--border);
+  position:relative;
+}
+.footer::before{
+  content:'';position:absolute;top:-1px;left:40%;right:40%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.2;
+}
+.footer a{color:var(--text-muted)}
+.footer a:hover{color:var(--accent)}
+
+/* ── responsive ───────────────────────────── */
+@media(max-width:640px){
+  .header-inner{flex-direction:column;gap:8px}
+  .lang-switch{align-self:flex-end}
+  .gallery{grid-template-columns:repeat(2,1fr);gap:10px}
+  .search-row{flex-direction:column}
+  .header-sub{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-brand">
+        <div class="mark">F</div>
+        <span class="header-title" id="siteTitle">FreeLicense Image Finder</span>
+      </div>
+      <div class="header-sub">
+        <span id="siteSub">Developed by</span>
+        <a href="https://juanmartinezgarcia.com" target="_blank" rel="noopener">Juan Martinez Garcia</a>
+      </div>
+    </div>
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="en" id="langEn">EN</button>
+      <button class="lang-btn" data-lang="es" id="langEs">ES</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="tip" id="tipBox">
+    <div class="tip-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </div>
+    <span id="tipText">
+      <strong>Click</strong> any image to open it in full resolution &middot; Use <code>👁</code> <code>🔗</code> <code>⬇</code> to view the source page, open the direct URL, or download
+    </span>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="query" placeholder="mountains, office, textures, cats…" autofocus>
+    <button id="btnSearch">Search</button>
+  </div>
+
+  <div class="filters" id="filters">
+    <span class="chip active" data-filter="cc0">CC0</span>
+    <span class="chip" data-filter="pdm" id="chipPd">Public Domain</span>
+    <span class="chip" data-filter="cc0,pdm" id="chipBoth">Both</span>
+  </div>
+
+  <div class="info" id="info"></div>
+  <div class="gallery" id="gallery"></div>
+  <div class="load-wrap" id="loadWrap" style="display:none">
+    <button class="btn-load" id="btnLoad">
+      <span class="spinner"></span>
+      <span class="lbl" id="loadLabel">+ Load more</span>
+    </button>
+  </div>
+  <div class="empty" id="empty" style="display:none">
+    <p id="emptyText">Type something and press <strong>Enter</strong>.</p>
+  </div>
+
+  <div class="footer">
+    <span id="footerText"></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── i18n ──────────────────────────────────────
+  const I18N = {
+    en: {
+      title: 'FreeLicense Image Finder',
+      sub:   'Developed by',
+      tip:   '<strong>Click</strong> any image to open it in full resolution &middot; Use <code>👁</code> <code>🔗</code> <code>⬇</code> to view the source page, open the direct URL, or download',
+      ph:    'mountains, office, textures, cats…',
+      search:'Search',
+      pd:    'Public Domain',
+      both:  'Both',
+      load:  '+ Load more',
+      btnView:'View source page',
+      btnLink:'Open direct image URL',
+      btnDl: 'Download image',
+      empty: 'Type something and press <strong>Enter</strong>.',
+      noRes: 'No results for',
+      try:   'Try different keywords or change the license filter.',
+      of:    'of',
+      results:'results for',
+      err:   '⚠ Connection error. Check the console (F12).',
+      searching: 'Searching…',
+      foot:  '',
+    },
+    es: {
+      title: 'FreeLicense Image Finder',
+      sub:   'Desarrollado por',
+      tip:   '<strong>Click</strong> en cualquier imagen para abrirla en resolución completa &middot; Usá <code>👁</code> <code>🔗</code> <code>⬇</code> para ver la página de origen, ir a la URL directa o descargar',
+      ph:    'montañas, oficina, texturas, gatos…',
+      search:'Buscar',
+      pd:    'Dominio público',
+      both:  'Ambos',
+      load:  '+ Cargar más',
+      btnView:'Ver página de origen',
+      btnLink:'Abrir URL directa de la imagen',
+      btnDl: 'Descargar imagen',
+      empty: 'Escribí algo y presioná <strong>Enter</strong>.',
+      noRes: 'Sin resultados para',
+      try:   'Probá con otras palabras o cambiá el filtro de licencia.',
+      of:    'de',
+      results:'resultados para',
+      err:   '⚠ Error de conexión. Revisá la consola (F12).',
+      searching: 'Buscando…',
+      foot:  '',
+    }
+  };
+
+  let lang = 'en';
+
+  function t(key) { return I18N[lang][key] || key; }
+
+  function setLang(code) {
+    lang = code;
+    document.documentElement.lang = code;
+    document.getElementById('siteTitle').textContent = t('title');
+    document.getElementById('siteSub').textContent = t('sub');
+    document.getElementById('tipText').innerHTML = t('tip');
+    document.getElementById('query').placeholder = t('ph');
+    document.getElementById('btnSearch').textContent = t('search');
+    document.getElementById('chipPd').textContent = t('pd');
+    document.getElementById('chipBoth').textContent = t('both');
+    document.getElementById('loadLabel').textContent = t('load');
+    document.getElementById('emptyText').innerHTML = t('empty');
+    document.getElementById('footerText').textContent = t('foot');
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
+    if (currentQuery) updateInfo();
+  }
+
+  // ── API ──────────────────────────────────────
+  const PER_PAGE = 20;
+  const API = 'https://api.openverse.org/v1/images';
+
+  let currentQuery = '';
+  let currentPage = 1;
+  let activeFilter = 'cc0';
+  let totalResults = 0;
+  let showing = 0;
+  let loading = false;
+
+  const $ = id => document.getElementById(id);
+  const gallery = $('gallery');
+  const info = $('info');
+  const empty = $('empty');
+  const loadWrap = $('loadWrap');
+  const btnLoad = $('btnLoad');
+  const btnSearch = $('btnSearch');
+  const queryEl = $('query');
+  const chips = document.querySelectorAll('.chip');
+
+  const ICONS = {
+    eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    dl:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  };
+
+  document.getElementById('langEn').addEventListener('click', () => setLang('en'));
+  document.getElementById('langEs').addEventListener('click', () => setLang('es'));
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      if (currentQuery) doSearch();
+    });
+  });
+
+  async function search(query, page, append) {
+    if (!query.trim() || loading) return;
+    loading = true;
+    btnSearch.disabled = true;
+
+    currentQuery = query.trim();
+    currentPage = page;
+
+    if (!append) {
+      gallery.innerHTML = '';
+      loadWrap.style.display = 'none';
+      empty.style.display = 'none';
+      info.textContent = t('searching');
+    }
+
+    btnLoad.classList.add('loading');
+
+    try {
+      const params = new URLSearchParams({
+        q: query, license: activeFilter,
+        page: String(page), page_size: String(PER_PAGE),
+      });
+      const res = await fetch(`${API}?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      totalResults = data.result_count || 0;
+      const hits = data.results || [];
+
+      if (hits.length === 0 && !append) {
+        empty.innerHTML = `<p>${t('noRes')} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>`;
+        empty.style.display = 'block';
+        info.textContent = '';
+        return;
+      }
+
+      render(hits, append);
+      showing = gallery.children.length;
+      updateInfo();
+
+      const hasMore = showing < totalResults;
+      loadWrap.style.display = hasMore ? 'block' : 'none';
+
+    } catch (err) {
+      info.textContent = t('err');
+      console.error(err);
+      if (!append) {
+        empty.innerHTML = `<p>${t('err')}</p>`;
+        empty.style.display = 'block';
+      }
+    } finally {
+      loading = false;
+      btnLoad.classList.remove('loading');
+      btnSearch.disabled = false;
+    }
+  }
+
+  function updateInfo() {
+    const licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
+    info.textContent = `${showing} ${t('of')} ${totalResults} ${t('results')} "${esc(currentQuery)}"` +
+      (licLabel ? ` · ${licLabel}` : '');
+  }
+
+  function render(hits, append) {
+    const frag = document.createDocumentFragment();
+    hits.forEach(img => {
+      const title   = img.title || 'Sin título';
+      const thumb   = img.url || img.thumbnail || '';
+      const author  = img.creator || '';
+      const authUrl = img.creator_url || '';
+      const prov    = img.provider || '';
+      const license = img.license || '';
+      const licVer  = img.license_version || '';
+      const licStr  = license ? `${license.toUpperCase()} ${licVer}`.trim() : 'Libre';
+      const pageUrl = img.foreign_landing_url || '';
+      const imgUrl  = img.url || '';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'card-img';
+      const elImg = document.createElement('img');
+      elImg.src = thumb;
+      elImg.alt = title;
+      elImg.loading = 'lazy';
+      if (imgUrl) imgDiv.addEventListener('click', () => window.open(imgUrl, '_blank'));
+      imgDiv.appendChild(elImg);
+
+      const foot = document.createElement('div');
+      foot.className = 'card-foot';
+
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+      const authorSpan = document.createElement('span');
+      authorSpan.className = 'author';
+      if (author && authUrl) {
+        authorSpan.innerHTML = `<a href="${authUrl}" target="_blank" rel="noopener">${esc(author)}</a>`;
+      } else if (author) {
+        authorSpan.textContent = author;
+      }
+      const licSpan = document.createElement('span');
+      licSpan.className = 'license';
+      licSpan.textContent = licStr + (prov ? ` · ${prov}` : '');
+      meta.appendChild(authorSpan);
+      meta.appendChild(licSpan);
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+      if (pageUrl) actions.appendChild(btnAction(ICONS.eye, t('btnView'), () => window.open(pageUrl, '_blank')));
+      if (imgUrl)  actions.appendChild(btnAction(ICONS.link, t('btnLink'), () => window.open(imgUrl, '_blank')));
+      if (imgUrl) {
+        const fname = title.replace(/[^a-z0-9_\-]/gi,'_').substring(0,40) + '.jpg';
+        actions.appendChild(btnAction(ICONS.dl, t('btnDl'), () => downloadImg(imgUrl, fname)));
+      }
+
+      foot.appendChild(meta);
+      foot.appendChild(actions);
+      card.appendChild(imgDiv);
+      card.appendChild(foot);
+      frag.appendChild(card);
+    });
+    gallery.appendChild(frag);
+  }
+
+  function btnAction(svg, title, onclick) {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.title = title;
+    btn.innerHTML = svg;
+    btn.addEventListener('click', e => { e.stopPropagation(); onclick(); });
+    return btn;
+  }
+
+  async function downloadImg(url, filename) {
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const ext = blob.type === 'image/png' ? '.png' : blob.type === 'image/gif' ? '.gif' : '.jpg';
+      const name = filename.replace(/\.\w+$/, '') + ext;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  const doSearch = () => { currentPage = 1; search(queryEl.value, 1, false); };
+  const loadMore = () => search(currentQuery, currentPage + 1, true);
+
+  btnSearch.addEventListener('click', doSearch);
+  queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  btnLoad.addEventListener('click', loadMore);
+
+  queryEl.focus();
+})();
+</script>
+</body>
+</html>
