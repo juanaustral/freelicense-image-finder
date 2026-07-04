@@ -149,14 +149,13 @@ body{
   background:var(--surface) !important;
   color:var(--text-dim) !important;
   border:1px solid var(--border) !important;
-  font-size:16px !important;line-height:1;padding:11px 14px !important;
+  font-size:12px !important;font-weight:600;padding:11px 14px !important;
 }
 .btn-random:hover{
   border-color:var(--accent) !important;
   color:var(--accent) !important;
   background:var(--accent-light) !important;
 }
-.btn-random svg{width:16px;height:16px;display:block}
 
 /* ── source chips ─────────────────────────── */
 .source-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
@@ -324,22 +323,20 @@ body{
   <div class="search-row">
     <input type="text" id="query" placeholder="mountains, office, textures, cats…" autofocus>
     <button id="btnSearch">Search</button>
-    <button class="btn-random" id="btnRandom" title="Random search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-    </button>
+    <button class="btn-random" id="btnRandom">Random Search</button>
   </div>
 
   <div class="source-row" id="sourceRow">
     <span class="source-label" id="sourceLabel">Source:</span>
-    <span class="source-chip active" data-source="openverse" id="srcOpenverse">Openverse</span>
+    <span class="source-chip" data-source="openverse" id="srcOpenverse">Openverse</span>
     <span class="source-chip" data-source="wikimedia" id="srcWikimedia">Wikimedia Commons</span>
-    <span class="source-chip" data-source="all" id="srcAll">All Sources</span>
+    <span class="source-chip active" data-source="all" id="srcAll">All Sources</span>
   </div>
 
   <div class="filters" id="filters">
-    <span class="chip active" data-filter="cc0">CC0</span>
+    <span class="chip" data-filter="cc0">CC0</span>
     <span class="chip" data-filter="pdm" id="chipPd">Public Domain</span>
-    <span class="chip" data-filter="cc0,pdm" id="chipBoth">Both</span>
+    <span class="chip active" data-filter="cc0,pdm" id="chipBoth">Both</span>
   </div>
 
   <div class="info" id="info"></div>
@@ -369,7 +366,7 @@ body{
       tip:   '<strong>Click</strong> any image to open it in full resolution &middot; Use <code>👁</code> <code>🔗</code> <code>⬇</code> to view the source page, open the direct URL, or download',
       ph:    'mountains, office, textures, cats…',
       search:'Search',
-      randomTitle:'Random search',
+      random:'Random Search',
       srcLabel:'Source:',
       srcOpenverse:'Openverse',
       srcWikimedia:'Wikimedia Commons',
@@ -395,7 +392,7 @@ body{
       tip:   '<strong>Click</strong> en cualquier imagen para abrirla en resolución completa &middot; Usá <code>👁</code> <code>🔗</code> <code>⬇</code> para ver la página de origen, ir a la URL directa o descargar',
       ph:    'montañas, oficina, texturas, gatos…',
       search:'Buscar',
-      randomTitle:'Búsqueda aleatoria',
+      random:'Random Search',
       srcLabel:'Fuente:',
       srcOpenverse:'Openverse',
       srcWikimedia:'Wikimedia Commons',
@@ -429,7 +426,7 @@ body{
     document.getElementById('tipText').innerHTML = t('tip');
     document.getElementById('query').placeholder = t('ph');
     document.getElementById('btnSearch').textContent = t('search');
-    document.getElementById('btnRandom').title = t('randomTitle');
+    document.getElementById('btnRandom').textContent = t('random');
     document.getElementById('sourceLabel').textContent = t('srcLabel');
     document.getElementById('srcOpenverse').textContent = t('srcOpenverse');
     document.getElementById('srcWikimedia').textContent = t('srcWikimedia');
@@ -465,8 +462,8 @@ body{
 
   let currentQuery = '';
   let currentPage = 1;
-  let activeFilter = 'cc0';
-  let activeSource = 'openverse';
+  let activeFilter = 'cc0,pdm';
+  let activeSource = 'all';
   let totalResults = 0;
   let showing = 0;
   let loading = false;
@@ -661,29 +658,38 @@ body{
     try {
       let allResults = [];
       let maxTotal = 0;
-      let srcInfo = '';
+      let errors = [];
 
       if (activeSource === 'openverse' || activeSource === 'all') {
-        const ovPage = activeSource === 'all' ? srcPage.openverse : page;
-        const ov = await searchOpenverse(query, ovPage, append);
-        allResults = allResults.concat(ov.results);
-        maxTotal += ov.total;
-        if (activeSource === 'all') srcPage.openverse++;
-        srcInfo = 'Openverse';
+        try {
+          const ovPage = activeSource === 'all' ? srcPage.openverse : page;
+          const ov = await searchOpenverse(query, ovPage, append);
+          allResults = allResults.concat(ov.results);
+          maxTotal += ov.total;
+          if (activeSource === 'all') srcPage.openverse++;
+        } catch (e) {
+          errors.push('Openverse: ' + e.message);
+          console.error('Openverse error:', e);
+        }
       }
 
       if (activeSource === 'wikimedia' || activeSource === 'all') {
-        const wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
-        const wm = await searchWikimedia(query, wmPage, append);
-        allResults = allResults.concat(wm.results);
-        maxTotal += wm.total;
-        if (activeSource === 'all') srcPage.wikimedia++;
-        srcInfo = srcInfo ? srcInfo + ' + Commons' : 'Wikimedia Commons';
+        try {
+          const wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
+          const wm = await searchWikimedia(query, wmPage, append);
+          allResults = allResults.concat(wm.results);
+          maxTotal += wm.total;
+          if (activeSource === 'all') srcPage.wikimedia++;
+        } catch (e) {
+          errors.push('Wikimedia Commons: ' + e.message);
+          console.error('Wikimedia error:', e);
+        }
       }
 
       if (allResults.length === 0 && !append) {
         const noRes = t('noRes');
-        empty.innerHTML = `<p>${noRes} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>`;
+        empty.innerHTML = `<p>${noRes} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>` +
+          (errors.length ? `<p style="font-size:11px;color:#a8a29e;margin-top:8px">${errors.join('; ')}</p>` : '');
         empty.style.display = 'block';
         info.textContent = '';
         return;
