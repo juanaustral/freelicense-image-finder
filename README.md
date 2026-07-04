@@ -8,11 +8,10 @@ Busca imágenes con licencia **CC0** y **Dominio Público** desde múltiples fue
 
 | Fuente | Contenido | API |
 |--------|-----------|-----|
-| **Openverse** | 800M+ imágenes CC0/PD (Flickr, museos, etc.) | api.openverse.org |
+| **Openverse** | 800M+ imagenes CC0/PD (Flickr, museos, etc.) | api.openverse.org |
 | **Wikimedia Commons** | 90M+ archivos multimedia CC0/PD | commons.wikimedia.org |
-| **Met Museum** | 490K+ obras de arte en dominio público | collectionapi.metmuseum.org |
 
-Se puede filtrar por fuente individual o usar "All Sources" para buscar en las tres simultáneamente.
+Se puede filtrar por fuente individual o usar "All Sources" para buscar en las dos simultaneamente.
 
 ## Como funciona
 

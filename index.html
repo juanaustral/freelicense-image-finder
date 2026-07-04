@@ -387,7 +387,6 @@ body{
     <span class="source-label" id="sourceLabel">Source:</span>
     <span class="source-chip" data-source="openverse" id="srcOpenverse">Openverse</span>
     <span class="source-chip" data-source="wikimedia" id="srcWikimedia">Wikimedia Commons</span>
-    <span class="source-chip" data-source="metmuseum" id="srcMetMuseum">Met Museum</span>
     <span class="source-chip active" data-source="all" id="srcAll">All Sources</span>
   </div>
 
@@ -412,7 +411,7 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.3.0</span>
+      <span class="fv-num" id="versionNum">v1.3.1</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
@@ -446,7 +445,6 @@ body{
       srcLabel:'Source:',
       srcOpenverse:'Openverse',
       srcWikimedia:'Wikimedia Commons',
-      srcMetMuseum:'Met Museum',
       srcAll:'All Sources',
       pd:    'Public Domain',
       both:  'Both',
@@ -474,7 +472,6 @@ body{
       srcLabel:'Fuente:',
       srcOpenverse:'Openverse',
       srcWikimedia:'Wikimedia Commons',
-      srcMetMuseum:'Met Museum',
       srcAll:'Todas las fuentes',
       pd:    'Dominio público',
       both:  'Ambos',
@@ -510,7 +507,6 @@ body{
     document.getElementById('sourceLabel').textContent = t('srcLabel');
     document.getElementById('srcOpenverse').textContent = t('srcOpenverse');
     document.getElementById('srcWikimedia').textContent = t('srcWikimedia');
-    document.getElementById('srcMetMuseum').textContent = t('srcMetMuseum');
     document.getElementById('srcAll').textContent = t('srcAll');
     document.getElementById('chipPd').textContent = t('pd');
     document.getElementById('chipBoth').textContent = t('both');
@@ -523,8 +519,9 @@ body{
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.3.0';
+  const VERSION = 'v1.3.1';
   const CHANGELOG = [
+    {v:'1.3.1', date:'2026-07-04', text:'Removido Met Museum. Random Search genera terminos de 1 o 2 palabras.'},
     {v:'1.3.0', date:'2026-07-04', text:'Agregada API del Met Museum como tercera fuente de imagenes'},
     {v:'1.2.0', date:'2026-07-04', text:'Boton Random Search como texto, defaults a All Sources + Both, errores por fuente independientes'},
     {v:'1.1.0', date:'2026-07-04', text:'Selector de fuentes (Openverse + Wikimedia Commons), Random Search, header redisenado con creditos'},
@@ -581,7 +578,7 @@ body{
   let showing = 0;
   let loading = false;
   // source-specific pagination state
-  let srcPage = { openverse: 1, wikimedia: 1, metmuseum: 1 };
+  let srcPage = { openverse: 1, wikimedia: 1 };
 
   const $ = id => document.getElementById(id);
   const gallery = $('gallery');
@@ -624,7 +621,12 @@ body{
 
   // ── random search ────────────────────────────
   btnRandom.addEventListener('click', () => {
-    const term = RANDOM_TERMS[Math.floor(Math.random() * RANDOM_TERMS.length)];
+    const words = RANDOM_TERMS;
+    const single = words[Math.floor(Math.random() * words.length)];
+    // 50% single word, 50% two words
+    const term = Math.random() < 0.5
+      ? single
+      : single + ' ' + words[Math.floor(Math.random() * words.length)];
     queryEl.value = term;
     doSearch();
   });
@@ -749,66 +751,6 @@ body{
     };
   }
 
-  async function searchMetMuseum(query, page, append) {
-    // Step 1: search for object IDs
-    const searchRes = await fetch(
-      `https://collectionapi.metmuseum.org/public/collection/v1/search?q=${encodeURIComponent(query)}&hasImages=true`
-    );
-    if (!searchRes.ok) throw new Error('Met search HTTP ' + searchRes.status);
-    const searchData = await searchRes.json();
-    const allIds = searchData.objectIDs || [];
-    const total = searchData.total || 0;
-    if (allIds.length === 0) return { results: [], total: 0, page: page };
-
-    // Step 2: paginate - take a slice for this page
-    const perPage = PER_PAGE;
-    const offset = (page - 1) * perPage;
-    const pageIds = allIds.slice(offset, offset + perPage);
-    if (pageIds.length === 0) return { results: [], total: total, page: page };
-
-    // Step 3: fetch object details in parallel (batch of 5 to be gentle)
-    const results = [];
-    for (let i = 0; i < pageIds.length; i += 5) {
-      const batch = pageIds.slice(i, i + 5);
-      const batchResults = await Promise.all(
-        batch.map(id =>
-          fetch(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`)
-            .then(r => r.ok ? r.json() : null)
-            .catch(() => null)
-        )
-      );
-      for (const obj of batchResults) {
-        if (!obj || !obj.primaryImage || !obj.isPublicDomain) continue;
-
-        // Apply license filter
-        const isPD = obj.isPublicDomain === true;
-        if (activeFilter === 'cc0' && !isPD) continue;
-        if (activeFilter === 'pdm' && !isPD) continue;
-        if (activeFilter === 'cc0,pdm' && !isPD) continue;
-
-        results.push({
-          type: 'metmuseum',
-          title: obj.title || obj.objectName || 'Untitled',
-          thumb: obj.primaryImageSmall || obj.primaryImage,
-          url: obj.primaryImage,
-          pageUrl: obj.objectURL,
-          author: obj.artistDisplayName || obj.creditLine || '',
-          authUrl: obj.artistWikidata_URL || '',
-          provider: 'Met Museum',
-          license: 'Public Domain',
-          licVer: '',
-        });
-      }
-    }
-
-    return {
-      results: results,
-      total: total,
-      page: page,
-      filtered: false,
-    };
-  }
-
   // ── main search ──────────────────────────────
   async function search(query, page, append) {
     if (!query.trim() || loading) return;
@@ -823,7 +765,7 @@ body{
       loadWrap.style.display = 'none';
       empty.style.display = 'none';
       info.textContent = t('searching');
-      srcPage = { openverse: 1, wikimedia: 1, metmuseum: 1 };
+      srcPage = { openverse: 1, wikimedia: 1 };
     }
 
     btnLoad.classList.add('loading');
@@ -856,19 +798,6 @@ body{
         } catch (e) {
           errors.push('Wikimedia Commons: ' + e.message);
           console.error('Wikimedia error:', e);
-        }
-      }
-
-      if (activeSource === 'metmuseum' || activeSource === 'all') {
-        try {
-          const mmPage = activeSource === 'all' ? srcPage.metmuseum : page;
-          const mm = await searchMetMuseum(query, mmPage, append);
-          allResults = allResults.concat(mm.results);
-          maxTotal += mm.total;
-          if (activeSource === 'all') srcPage.metmuseum++;
-        } catch (e) {
-          errors.push('Met Museum: ' + e.message);
-          console.error('Met Museum error:', e);
         }
       }
 
@@ -907,7 +836,7 @@ body{
 
   function updateInfo() {
     const licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
-    const srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'metmuseum':'Met Museum', 'all':'Openverse + Commons + Met' }[activeSource] || '';
+    const srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
     info.textContent = `${showing} ${t('of')} ${totalResults} ${t('results')} "${esc(currentQuery)}"` +
       (licLabel ? ` · ${licLabel}` : '') +
       ` · ${srcLabel}`;
