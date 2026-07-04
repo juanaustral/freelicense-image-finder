@@ -770,10 +770,12 @@ body{
     body.onclick = function(e) {
       const target = e.target;
 
-      // Delete image
-      if (target.classList.contains('del-img')) {
+      // Delete image - use closest in case target is text child
+      const delBtn = target.closest('.del-img');
+      if (delBtn) {
         e.stopPropagation();
-        const imgDiv = target.closest('.album-img');
+        const imgDiv = delBtn.closest('.album-img');
+        if (!imgDiv) return;
         const album = imgDiv.dataset.album;
         const url = imgDiv.dataset.url;
         const d = loadAlbums();
@@ -787,15 +789,9 @@ body{
         return;
       }
 
-      // Open image
-      if (target.closest('.album-img')) {
-        const imgDiv = target.closest('.album-img');
-        window.open(imgDiv.dataset.url, '_blank');
-        return;
-      }
-
-      // Create album
-      if (target.classList.contains('create-album-btn')) {
+      // Create album button
+      const createBtn = target.closest('.create-album-btn');
+      if (createBtn) {
         const name = prompt(t('albumsCreatePrompt'));
         if (name && name.trim()) {
           const d = loadAlbums();
@@ -803,6 +799,13 @@ body{
           saveAlbums(d);
           openAlbumsModal();
         }
+        return;
+      }
+
+      // Open image
+      const imgDiv = target.closest('.album-img');
+      if (imgDiv) {
+        window.open(imgDiv.dataset.url, '_blank');
         return;
       }
     };
@@ -827,6 +830,8 @@ body{
     const data = loadAlbums();
     btn.classList.toggle('has-saved', Object.values(data).some(arr => arr.length > 0));
   }
+
+  document.getElementById('btnAlbums').addEventListener('click', openAlbumsModal);
 
   function refreshBookmarks() {
     document.querySelectorAll('.action-btn.bookmark').forEach(btn => {
