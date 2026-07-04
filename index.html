@@ -259,7 +259,7 @@ body{
 /* ── footer ───────────────────────────────── */
 .footer{
   text-align:center;font-size:11px;color:var(--text-muted);
-  padding:22px 0 30px;border-top:1px solid var(--border);
+  padding:18px 0 28px;border-top:1px solid var(--border);
   position:relative;
 }
 .footer::before{
@@ -268,8 +268,65 @@ body{
   background:linear-gradient(90deg,transparent,var(--accent),transparent);
   opacity:.2;
 }
-.footer a{color:var(--text-muted)}
+.footer a{color:var(--text-muted);text-decoration:none}
 .footer a:hover{color:var(--accent)}
+.footer .fv{display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:color .15s}
+.footer .fv:hover{color:var(--accent)}
+.footer .fv-num{padding:1px 6px;border-radius:4px;background:var(--border);font-size:10px;font-weight:600;font-family:monospace;transition:all .15s}
+.footer .fv:hover .fv-num{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+.footer .dev-credit{margin-top:4px;font-size:10px}
+.footer .dev-credit a{color:var(--accent);font-weight:500}
+.footer .dev-credit a:hover{text-decoration:underline}
+
+/* ── changelog modal ──────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-box{
+  background:var(--surface);border-radius:var(--radius-lg);
+  max-width:480px;width:90%;max-height:70vh;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+  display:flex;flex-direction:column;
+  transform:translateY(12px);transition:transform .25s;
+}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;border-bottom:1px solid var(--border);
+}
+.modal-head h3{font-size:15px;font-weight:700;color:var(--text)}
+.modal-close{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);transition:all .15s;font-family:inherit;
+}
+.modal-close:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.modal-body{
+  padding:12px 20px 20px;overflow-y:auto;flex:1;
+}
+.cl-entry{
+  display:flex;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.cl-entry:last-child{border-bottom:none}
+.cl-version{
+  flex-shrink:0;width:52px;
+  padding:2px 6px;border-radius:4px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:10px;font-weight:700;font-family:monospace;
+  text-align:center;height:fit-content;
+}
+.cl-body{flex:1;min-width:0}
+.cl-date{font-size:10px;color:var(--text-muted);margin-bottom:2px}
+.cl-text{font-size:12px;color:var(--text-dim);line-height:1.5}
+.cl-text ul{margin:4px 0 0 14px;padding:0}
+.cl-text li{margin-bottom:2px}
 
 /* ── responsive ───────────────────────────── */
 @media(max-width:640px){
@@ -353,7 +410,25 @@ body{
   </div>
 
   <div class="footer">
-    <span id="footerText"></span>
+    <span class="fv" id="versionBadge">
+      <span id="footerLabel">FreeLicense Image Finder</span>
+      <span class="fv-num" id="versionNum">v1.3.0</span>
+    </span>
+    <div class="dev-credit">
+      <span id="footerCredit">Developed by</span>
+      <a href="https://juanmartinezgarcia.com" target="_blank" rel="noopener">Juan Martinez Garcia</a>
+    </div>
+  </div>
+</div>
+
+<!-- changelog modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Changelog</h3>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
 
@@ -386,7 +461,8 @@ body{
       results:'results for',
       err:   '⚠ Connection error. Check the console (F12).',
       searching: 'Searching…',
-      foot:  '',
+      changelog: 'Changelog',
+      footerCredit: 'Developed by',
     },
     es: {
       title: 'FreeLicense Image Finder',
@@ -413,7 +489,8 @@ body{
       results:'resultados para',
       err:   '⚠ Error de conexión. Revisá la consola (F12).',
       searching: 'Buscando…',
-      foot:  '',
+      changelog: 'Historial de cambios',
+      footerCredit: 'Desarrollado por',
     }
   };
 
@@ -439,10 +516,42 @@ body{
     document.getElementById('chipBoth').textContent = t('both');
     document.getElementById('loadLabel').textContent = t('load');
     document.getElementById('emptyText').innerHTML = t('empty');
-    document.getElementById('footerText').textContent = t('foot');
+    document.getElementById('footerCredit').textContent = t('footerCredit');
+    document.getElementById('modalTitle').textContent = t('changelog');
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
     if (currentQuery) updateInfo();
   }
+
+  // ── changelog ────────────────────────────────
+  const VERSION = 'v1.3.0';
+  const CHANGELOG = [
+    {v:'1.3.0', date:'2026-07-04', text:'Agregada API del Met Museum como tercera fuente de imagenes'},
+    {v:'1.2.0', date:'2026-07-04', text:'Boton Random Search como texto, defaults a All Sources + Both, errores por fuente independientes'},
+    {v:'1.1.0', date:'2026-07-04', text:'Selector de fuentes (Openverse + Wikimedia Commons), Random Search, header redisenado con creditos'},
+    {v:'1.0.0', date:'2026-07-04', text:'Version inicial con busqueda en Openverse, filtros CC0/PD, galeria, i18n EN/ES'},
+  ];
+
+  document.getElementById('versionBadge').addEventListener('click', () => {
+    const overlay = document.getElementById('modalOverlay');
+    const body = document.getElementById('modalBody');
+    body.innerHTML = CHANGELOG.map(e => `
+      <div class="cl-entry">
+        <div class="cl-version">v${e.v}</div>
+        <div class="cl-body">
+          <div class="cl-date">${e.date}</div>
+          <div class="cl-text">${e.text}</div>
+        </div>
+      </div>
+    `).join('');
+    overlay.classList.add('open');
+  });
+
+  document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+  });
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.target.classList.remove('open');
+  });
 
   // ── random terms ─────────────────────────────
   const RANDOM_TERMS = [
