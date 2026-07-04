@@ -178,6 +178,19 @@ body{
 .chip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
 
+/* ── albums bar ───────────────────────────── */
+.albums-bar{display:flex;gap:5px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.albums-bar .albums-label{font-size:11px;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+.btn-albums{
+  padding:4px 11px;border:1px solid var(--border);border-radius:20px;
+  font-size:11px;font-weight:600;cursor:pointer;background:var(--surface);
+  color:var(--text-dim);transition:all .18s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-albums:hover{border-color:var(--accent);color:var(--accent)}
+.btn-albums.has-saved{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.btn-albums svg{width:12px;height:12px}
+
 /* info */
 .info{font-size:12px;color:var(--text-dim);margin-bottom:16px;min-height:18px}
 
@@ -235,6 +248,10 @@ body{
 }
 .action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 .action-btn svg{width:13px;height:13px;display:block}
+/* bookmark star */
+.action-btn.bookmark{color:var(--text-muted)}
+.action-btn.bookmark.saved{color:#f59e0b;border-color:#f59e0b}
+.action-btn.bookmark.saved:hover{background:#fffbeb;border-color:#f59e0b;color:#d97706}
 
 /* ── load more ────────────────────────────── */
 .load-wrap{text-align:center;margin-bottom:44px}
@@ -278,7 +295,7 @@ body{
 .footer .dev-credit a{color:var(--accent);font-weight:500}
 .footer .dev-credit a:hover{text-decoration:underline}
 
-/* ── changelog modal ──────────────────────── */
+/* ── modals ───────────────────────────────── */
 .modal-overlay{
   position:fixed;inset:0;z-index:999;
   background:rgba(0,0,0,.35);
@@ -289,7 +306,7 @@ body{
 .modal-overlay.open{opacity:1;pointer-events:auto}
 .modal-box{
   background:var(--surface);border-radius:var(--radius-lg);
-  max-width:480px;width:90%;max-height:70vh;
+  max-width:560px;width:90%;max-height:80vh;
   box-shadow:0 20px 60px rgba(0,0,0,.15);
   display:flex;flex-direction:column;
   transform:translateY(12px);transition:transform .25s;
@@ -307,9 +324,9 @@ body{
   color:var(--text-dim);transition:all .15s;font-family:inherit;
 }
 .modal-close:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
-.modal-body{
-  padding:12px 20px 20px;overflow-y:auto;flex:1;
-}
+.modal-body{padding:12px 20px 20px;overflow-y:auto;flex:1}
+
+/* ── changelog ────────────────────────────── */
 .cl-entry{
   display:flex;gap:10px;padding:10px 0;
   border-bottom:1px solid var(--border);
@@ -325,8 +342,45 @@ body{
 .cl-body{flex:1;min-width:0}
 .cl-date{font-size:10px;color:var(--text-muted);margin-bottom:2px}
 .cl-text{font-size:12px;color:var(--text-dim);line-height:1.5}
-.cl-text ul{margin:4px 0 0 14px;padding:0}
-.cl-text li{margin-bottom:2px}
+
+/* ── albums modal inner ───────────────────── */
+.albums-empty{text-align:center;padding:30px 20px;color:var(--text-dim);font-size:12px}
+.album-group{margin-bottom:16px}
+.album-group:last-child{margin-bottom:0}
+.album-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.album-name{font-size:13px;font-weight:600;color:var(--text)}
+.album-count{font-size:11px;color:var(--text-muted)}
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+.album-img{aspect-ratio:1;border-radius:6px;overflow:hidden;cursor:pointer;position:relative;border:1px solid var(--border)}
+.album-img img{width:100%;height:100%;object-fit:cover;display:block}
+.album-img .del-img{
+  display:none;position:absolute;top:2px;right:2px;width:18px;height:18px;
+  border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;
+  font-size:10px;line-height:1;cursor:pointer;align-items:center;justify-content:center;
+  font-family:inherit;
+}
+.album-img:hover .del-img{display:flex}
+.album-img .del-img:hover{background:rgba(220,38,38,.8)}
+.create-album-btn{
+  display:inline-flex;align-items:center;gap:4px;padding:5px 12px;
+  border:1px dashed var(--border);border-radius:20px;background:transparent;
+  font-size:11px;font-weight:600;cursor:pointer;color:var(--text-dim);font-family:inherit;
+  transition:all .15s;
+}
+.create-album-btn:hover{border-color:var(--accent);color:var(--accent)}
+.album-disclaimer{margin-top:16px;font-size:10px;color:var(--text-muted);text-align:center;border-top:1px solid var(--border);padding-top:12px}
+
+/* ── album selector popup ─────────────────── */
+.album-popup{position:absolute;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 30px rgba(0,0,0,.1);padding:6px;min-width:160px;display:none}
+.album-popup.open{display:block}
+.album-popup-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;font-size:11px;cursor:pointer;color:var(--text-dim);transition:all .1s;white-space:nowrap;border:none;background:transparent;width:100%;font-family:inherit;text-align:left}
+.album-popup-item:hover{background:var(--accent-light);color:var(--accent)}
+.album-popup-item svg{width:12px;height:12px}
+.album-popup-divider{height:1px;background:var(--border);margin:4px 6px}
+
+/* ── toast ────────────────────────────────── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);z-index:1000;background:var(--text);color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── responsive ───────────────────────────── */
 @media(max-width:640px){
@@ -396,6 +450,14 @@ body{
     <span class="chip active" data-filter="cc0,pdm" id="chipBoth">Both</span>
   </div>
 
+  <div class="albums-bar">
+    <span class="albums-label" id="albumsLabel">Albums:</span>
+    <button class="btn-albums" id="btnAlbums">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span id="albumsBtnText">My Albums</span>
+    </button>
+  </div>
+
   <div class="info" id="info"></div>
   <div class="gallery" id="gallery"></div>
   <div class="load-wrap" id="loadWrap" style="display:none">
@@ -411,12 +473,23 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.3.1</span>
+      <span class="fv-num" id="versionNum">v1.4.0</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
       <a href="https://juanmartinezgarcia.com" target="_blank" rel="noopener">Juan Martinez Garcia</a>
     </div>
+  </div>
+</div>
+
+<!-- albums modal -->
+<div class="modal-overlay" id="albumsOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="albumsTitle">My Albums</h3>
+      <button class="modal-close" id="albumsClose">✕</button>
+    </div>
+    <div class="modal-body" id="albumsBody"></div>
   </div>
 </div>
 
@@ -430,6 +503,8 @@ body{
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 (function(){
@@ -452,6 +527,8 @@ body{
       btnView:'View source page',
       btnLink:'Open direct image URL',
       btnDl: 'Download image',
+      bookmark:'Save to album',
+      bookmarkSaved:'Remove from album',
       empty: 'Type something and press <strong>Enter</strong>.',
       noRes: 'No results for',
       try:   'Try different keywords or change the license filter.',
@@ -461,6 +538,19 @@ body{
       searching: 'Searching…',
       changelog: 'Changelog',
       footerCredit: 'Developed by',
+      albumsLabel:'Albums:',
+      albumsBtn:'My Albums',
+      albumsTitle:'My Albums',
+      albumsEmpty:'No saved images yet. Click the ★ on any image to save it to an album.',
+      albumsCreate:'+ New Album',
+      albumsCreatePrompt:'Album name:',
+      albumsDel:'Remove',
+      albumsSaved:'Saved to',
+      albumsRemoved:'Removed from',
+      albumsDisclaimer:'Albums are stored locally in your browser. They may be lost if you clear your browsing data.',
+      newAlbum:'New Album',
+      toastSaved:'Saved to Favorites',
+      toastRemoved:'Removed from Favorites',
     },
     es: {
       title: 'FreeLicense Image Finder',
@@ -479,6 +569,8 @@ body{
       btnView:'Ver página de origen',
       btnLink:'Abrir URL directa de la imagen',
       btnDl: 'Descargar imagen',
+      bookmark:'Guardar en album',
+      bookmarkSaved:'Quitar del album',
       empty: 'Escribí algo y presioná <strong>Enter</strong>.',
       noRes: 'Sin resultados para',
       try:   'Probá con otras palabras o cambiá el filtro de licencia.',
@@ -488,6 +580,19 @@ body{
       searching: 'Buscando…',
       changelog: 'Historial de cambios',
       footerCredit: 'Desarrollado por',
+      albumsLabel:'Albumes:',
+      albumsBtn:'Mis Albumes',
+      albumsTitle:'Mis Albumes',
+      albumsEmpty:'Todavia no hay imagenes guardadas. Hacé click en ★ sobre cualquier imagen para guardarla en un album.',
+      albumsCreate:'+ Nuevo Album',
+      albumsCreatePrompt:'Nombre del album:',
+      albumsDel:'Eliminar',
+      albumsSaved:'Guardado en',
+      albumsRemoved:'Eliminado de',
+      albumsDisclaimer:'Los albumes se guardan localmente en tu navegador. Pueden perderse si borras los datos de navegacion.',
+      newAlbum:'Nuevo Album',
+      toastSaved:'Guardado en Favoritos',
+      toastRemoved:'Eliminado de Favoritos',
     }
   };
 
@@ -514,13 +619,17 @@ body{
     document.getElementById('emptyText').innerHTML = t('empty');
     document.getElementById('footerCredit').textContent = t('footerCredit');
     document.getElementById('modalTitle').textContent = t('changelog');
+    document.getElementById('albumsLabel').textContent = t('albumsLabel');
+    document.getElementById('albumsBtnText').textContent = t('albumsBtn');
+    document.getElementById('albumsTitle').textContent = t('albumsTitle');
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
     if (currentQuery) updateInfo();
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.3.1';
+  const VERSION = 'v1.4.0';
   const CHANGELOG = [
+    {v:'1.4.0', date:'2026-07-04', text:'Albumes locales: guardar imagenes en Favoritos con localStorage. Disclaimers de almacenamiento local.'},
     {v:'1.3.1', date:'2026-07-04', text:'Removido Met Museum. Random Search genera terminos de 1 o 2 palabras.'},
     {v:'1.3.0', date:'2026-07-04', text:'Agregada API del Met Museum como tercera fuente de imagenes'},
     {v:'1.2.0', date:'2026-07-04', text:'Boton Random Search como texto, defaults a All Sources + Both, errores por fuente independientes'},
@@ -549,6 +658,186 @@ body{
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) e.target.classList.remove('open');
   });
+
+  // ── albums ───────────────────────────────────
+  const STORAGE_KEY = 'flif_albums';
+
+  function loadAlbums() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { 'Favorites': [] };
+    } catch { return { 'Favorites': [] }; }
+  }
+
+  function saveAlbums(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function getImageId(img) {
+    return img.url || img.thumb || '';
+  }
+
+  function isSaved(img) {
+    const data = loadAlbums();
+    const id = getImageId(img);
+    return Object.values(data).some(album =>
+      album.some(item => getImageId(item) === id)
+    );
+  }
+
+  function findAlbumContaining(img) {
+    const data = loadAlbums();
+    const id = getImageId(img);
+    for (const [name, items] of Object.entries(data)) {
+      if (items.some(item => getImageId(item) === id)) return name;
+    }
+    return null;
+  }
+
+  function toggleSave(imgData, albumName) {
+    const data = loadAlbums();
+    const id = getImageId(imgData);
+    const existing = findAlbumContaining(imgData);
+
+    if (existing) {
+      // Remove
+      data[existing] = data[existing].filter(item => getImageId(item) !== id);
+      if (data[existing].length === 0 && existing !== 'Favorites') {
+        delete data[existing];
+      }
+      saveAlbums(data);
+      return { action: 'removed', album: existing };
+    } else {
+      // Save
+      if (!data[albumName]) data[albumName] = [];
+      data[albumName].push({
+        title: imgData.title,
+        thumb: imgData.thumb,
+        url: imgData.url,
+        pageUrl: imgData.pageUrl,
+        author: imgData.author,
+        authUrl: imgData.authUrl,
+        provider: imgData.provider,
+        license: imgData.license,
+        licVer: imgData.licVer,
+        savedAt: new Date().toISOString(),
+      });
+      saveAlbums(data);
+      return { action: 'saved', album: albumName };
+    }
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // albums button
+  document.getElementById('btnAlbums').addEventListener('click', openAlbumsModal);
+
+  function openAlbumsModal() {
+    const overlay = document.getElementById('albumsOverlay');
+    const body = document.getElementById('albumsBody');
+    const data = loadAlbums();
+    const albumNames = Object.keys(data);
+
+    if (albumNames.length === 0 || albumNames.every(n => data[n].length === 0)) {
+      body.innerHTML = `<div class="albums-empty"><p>${t('albumsEmpty')}</p></div>` +
+        `<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">${t('albumsCreate')}</button></div>` +
+        `<div class="album-disclaimer">${t('albumsDisclaimer')}</div>`;
+    } else {
+      let html = '';
+      for (const name of albumNames) {
+        const items = data[name];
+        if (items.length === 0) continue;
+        html += `<div class="album-group">
+          <div class="album-head">
+            <div>
+              <span class="album-name">${esc(name)}</span>
+              <span class="album-count">${items.length}</span>
+            </div>
+            <button class="create-album-btn" style="font-size:10px;padding:3px 8px;border-style:solid" onclick="(function(){document.getElementById('albumsBody').querySelector('#createAlbumBtn2')?.click()})()">${t('newAlbum')}</button>
+          </div>
+          <div class="album-grid">`;
+        items.forEach(item => {
+          html += `<div class="album-img" onclick="window.open('${escAttr(item.url || '')}','_blank')">
+            <img src="${escAttr(item.thumb || item.url)}" alt="${esc(item.title)}" loading="lazy">
+            <button class="del-img" data-album="${escAttr(name)}" data-url="${escAttr(item.url || item.thumb)}" title="${t('albumsDel')}">✕</button>
+          </div>`;
+        });
+        html += `</div></div>`;
+      }
+      html += `<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn2">${t('albumsCreate')}</button></div>`;
+      html += `<div class="album-disclaimer">${t('albumsDisclaimer')}</div>`;
+      body.innerHTML = html;
+
+      // Delete handlers
+      body.querySelectorAll('.del-img').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const album = btn.dataset.album;
+          const url = btn.dataset.url;
+          const data2 = loadAlbums();
+          data2[album] = data2[album].filter(item => (item.url || item.thumb) !== url);
+          if (data2[album].length === 0 && album !== 'Favorites') delete data2[album];
+          saveAlbums(data2);
+          showToast(t('albumsRemoved') + ' ' + album);
+          updateAlbumsButton();
+          refreshBookmarks();
+          openAlbumsModal(); // refresh view
+        });
+      });
+    }
+
+    // Create album handler
+    setTimeout(() => {
+      const btns = body.querySelectorAll('[id^="createAlbumBtn"]');
+      btns.forEach(btn => {
+        btn.onclick = () => {
+          const name = prompt(t('albumsCreatePrompt'));
+          if (name && name.trim()) {
+            const d = loadAlbums();
+            if (!d[name.trim()]) d[name.trim()] = [];
+            saveAlbums(d);
+            openAlbumsModal();
+          }
+        };
+      });
+    }, 0);
+
+    overlay.classList.add('open');
+  }
+
+  document.getElementById('albumsClose').addEventListener('click', () => {
+    document.getElementById('albumsOverlay').classList.remove('open');
+  });
+  document.getElementById('albumsOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.target.classList.remove('open');
+  });
+
+  function updateAlbumsButton() {
+    const btn = document.getElementById('btnAlbums');
+    const data = loadAlbums();
+    const hasAny = Object.values(data).some(arr => arr.length > 0);
+    btn.classList.toggle('has-saved', hasAny);
+  }
+
+  function refreshBookmarks() {
+    document.querySelectorAll('.action-btn.bookmark').forEach(btn => {
+      const index = parseInt(btn.dataset.index);
+      const card = btn.closest('.card');
+      const imgData = card ? card._imgData : null;
+      if (imgData) {
+        btn.classList.toggle('saved', isSaved(imgData));
+        btn.title = isSaved(imgData) ? t('bookmarkSaved') : t('bookmark');
+      }
+    });
+  }
+
+  // Bookmark icon
+  const STAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
   // ── random terms ─────────────────────────────
   const RANDOM_TERMS = [
@@ -596,6 +885,7 @@ body{
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
     link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
     dl:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    star: STAR_ICON,
   };
 
   document.getElementById('langEn').addEventListener('click', () => setLang('en'));
@@ -737,7 +1027,6 @@ body{
         provider: 'Wikimedia',
         license: meta.LicenseShortName?.value || '',
         licVer: '',
-        // For Wikimedia, use original URL as thumbnail (no separate thumb)
         wikimedia: true,
       });
     }
@@ -746,7 +1035,6 @@ body{
       results: results,
       total: total,
       page: page,
-      // flag if we filtered many results (for info display)
       filtered: results.length < hits.length,
     };
   }
@@ -844,7 +1132,7 @@ body{
 
   function render(hits, append) {
     const frag = document.createDocumentFragment();
-    hits.forEach(img => {
+    hits.forEach((img, idx) => {
       const title   = img.title || 'Sin título';
       const thumb   = img.thumb || '';
       const author  = img.author || '';
@@ -858,6 +1146,7 @@ body{
 
       const card = document.createElement('div');
       card.className = 'card';
+      card._imgData = img; // store for bookmark
 
       const imgDiv = document.createElement('div');
       imgDiv.className = 'card-img';
@@ -889,6 +1178,22 @@ body{
 
       const actions = document.createElement('div');
       actions.className = 'card-actions';
+      // Bookmark button
+      const saved = isSaved(img);
+      const bmBtn = btnAction(ICONS.star, saved ? t('bookmarkSaved') : t('bookmark'), () => {
+        const result = toggleSave(img, 'Favorites');
+        if (result.action === 'saved') {
+          showToast(t('toastSaved'));
+        } else {
+          showToast(t('toastRemoved'));
+        }
+        updateAlbumsButton();
+        refreshBookmarks();
+      });
+      bmBtn.classList.add('bookmark');
+      if (saved) bmBtn.classList.add('saved');
+      actions.appendChild(bmBtn);
+
       if (pageUrl) actions.appendChild(btnAction(ICONS.eye, t('btnView'), () => window.open(pageUrl, '_blank')));
       if (imgUrl)  actions.appendChild(btnAction(ICONS.link, t('btnLink'), () => window.open(imgUrl, '_blank')));
       if (imgUrl) {
@@ -954,6 +1259,9 @@ body{
   btnSearch.addEventListener('click', doSearch);
   queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
   btnLoad.addEventListener('click', loadMore);
+
+  // Init albums button state
+  updateAlbumsButton();
 
   queryEl.focus();
 })();
