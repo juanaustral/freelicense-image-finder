@@ -251,7 +251,7 @@ body{
 .card-meta .author a{color:var(--text);text-decoration:none}
 .card-meta .author a:hover{color:var(--accent)}
 .card-meta .license{white-space:nowrap;font-size:10px;color:var(--text-muted)}
-.card-actions{display:flex;gap:4px}
+.card-actions{display:flex;gap:4px;position:relative}
 .action-btn{
   width:30px;height:25px;display:inline-flex;align-items:center;justify-content:center;
   border:1px solid var(--border);border-radius:5px;background:var(--surface);
@@ -264,6 +264,23 @@ body{
 .action-btn.bookmark{color:var(--text-muted)}
 .action-btn.bookmark.saved{color:#f59e0b;border-color:#f59e0b}
 .action-btn.bookmark.saved:hover{background:#fffbeb;border-color:#f59e0b;color:#d97706}
+
+/* ── album selector popup ─────────────────── */
+.album-popup{
+  position:absolute;z-index:50;top:100%;left:0;margin-top:2px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+  padding:4px;min-width:150px;display:none;
+}
+.album-popup.open{display:block}
+.album-popup-item{
+  display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:5px;
+  font-size:11px;font-weight:500;cursor:pointer;color:var(--text-dim);
+  transition:all .1s;
+}
+.album-popup-item:hover{background:var(--accent-light);color:var(--accent)}
+.album-popup-item svg{width:12px;height:12px;flex-shrink:0}
+.album-popup-divider{height:1px;background:var(--border);margin:4px 8px}
 
 /* ── load more ────────────────────────────── */
 .load-wrap{text-align:center;margin-bottom:44px}
@@ -373,6 +390,7 @@ body{
 }
 .album-img:hover .del-img{display:flex}
 .album-img .del-img:hover{background:rgba(220,38,38,.8)}
+.album-empty-placeholder{aspect-ratio:1;border-radius:6px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted);text-align:center;padding:8px}
 .create-album-btn{
   display:inline-flex;align-items:center;gap:4px;padding:5px 12px;
   border:1px dashed var(--border);border-radius:20px;background:transparent;
@@ -481,7 +499,7 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.5.0</span>
+      <span class="fv-num" id="versionNum">v1.6.0</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
@@ -549,7 +567,7 @@ body{
       albumsLabel:'Albums:',
       albumsBtn:'My Albums',
       albumsTitle:'My Albums',
-      albumsEmpty:'No saved images yet. Click the ★ on any image to save it to an album.',
+      albumsEmpty:'No saved images yet. Click the bookmark on any image to save it to an album.',
       albumsCreate:'+ New Album',
       albumsCreatePrompt:'Album name:',
       albumsDel:'Remove',
@@ -557,11 +575,12 @@ body{
       albumsRemoved:'Removed from',
       albumsDisclaimer:'Albums are stored locally in your browser. They may be lost if you clear your browsing data.',
       newAlbum:'+ New Album',
-      toastSaved:'Saved to Favorites',
-      toastRemoved:'Removed from Favorites',
+      toastSaved:'Saved to',
+      toastRemoved:'Removed from',
       viewedLabel:'Mark Viewed',
       viewedOn:'Mark Viewed ON',
       viewedOff:'Mark Viewed OFF',
+      albumEmptyLabel:'No images yet',
     },
     es: {
       title: 'FreeLicense Image Finder',
@@ -594,7 +613,7 @@ body{
       albumsLabel:'Albumes:',
       albumsBtn:'Mis Albumes',
       albumsTitle:'Mis Albumes',
-      albumsEmpty:'Todavia no hay imagenes guardadas. Hacé click en ★ sobre cualquier imagen para guardarla en un album.',
+      albumsEmpty:'Todavia no hay imagenes guardadas. Hacé click en el marcador sobre cualquier imagen para guardarla en un album.',
       albumsCreate:'+ Nuevo Album',
       albumsCreatePrompt:'Nombre del album:',
       albumsDel:'Eliminar',
@@ -602,11 +621,12 @@ body{
       albumsRemoved:'Eliminado de',
       albumsDisclaimer:'Los albumes se guardan localmente en tu navegador. Pueden perderse si borras los datos de navegacion.',
       newAlbum:'+ Nuevo Album',
-      toastSaved:'Guardado en Favoritos',
-      toastRemoved:'Eliminado de Favoritos',
+      toastSaved:'Guardado en',
+      toastRemoved:'Eliminado de',
       viewedLabel:'Marcar Vistas',
       viewedOn:'Marcar Vistas ON',
       viewedOff:'Marcar Vistas OFF',
+      albumEmptyLabel:'Sin imagenes',
     }
   };
 
@@ -642,10 +662,11 @@ body{
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.5.0';
+  const VERSION = 'v1.6.0';
   const CHANGELOG = [
-    {v:'1.5.0', date:'2026-07-04', text:'Ribbon icon, Mark Viewed toggle, New Album fix. Albumes ahora con liston icono y opacidad en imagenes vistas.'},
-    {v:'1.4.0', date:'2026-07-04', text:'Albumes locales: guardar imagenes en Favoritos con localStorage. Disclaimers de almacenamiento local.'},
+    {v:'1.6.0', date:'2026-07-04', text:'Album selector al guardar. Albumes vacios visibles en modal. Nueva album con prompt funcional.'},
+    {v:'1.5.0', date:'2026-07-04', text:'Ribbon icon, Mark Viewed toggle, New Album fix.'},
+    {v:'1.4.0', date:'2026-07-04', text:'Albumes locales: guardar imagenes en Favoritos con localStorage.'},
     {v:'1.3.1', date:'2026-07-04', text:'Removido Met Museum. Random Search genera terminos de 1 o 2 palabras.'},
     {v:'1.3.0', date:'2026-07-04', text:'Agregada API del Met Museum como tercera fuente de imagenes'},
     {v:'1.2.0', date:'2026-07-04', text:'Boton Random Search como texto, defaults a All Sources + Both, errores por fuente independientes'},
@@ -656,22 +677,17 @@ body{
   document.getElementById('versionBadge').addEventListener('click', () => {
     const overlay = document.getElementById('modalOverlay');
     const body = document.getElementById('modalBody');
-    body.innerHTML = CHANGELOG.map(e => `
-      <div class="cl-entry">
-        <div class="cl-version">v${e.v}</div>
-        <div class="cl-body">
-          <div class="cl-date">${e.date}</div>
-          <div class="cl-text">${e.text}</div>
-        </div>
-      </div>
-    `).join('');
+    body.innerHTML = CHANGELOG.map(e => {
+      var cls = e.v === '1.6.0' ? ' style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"' : '';
+      return '<div class="cl-entry"><div class="cl-version"' + cls + '>v' + e.v + '</div><div class="cl-body"><div class="cl-date">' + e.date + '</div><div class="cl-text">' + e.text + '</div></div></div>';
+    }).join('');
     overlay.classList.add('open');
   });
 
   document.getElementById('modalClose').addEventListener('click', () => {
     document.getElementById('modalOverlay').classList.remove('open');
   });
-  document.getElementById('modalOverlay').addEventListener('click', e => {
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
     if (e.target === e.currentTarget) e.target.classList.remove('open');
   });
 
@@ -680,9 +696,8 @@ body{
   const VIEWED_KEY = 'flif_viewed';
 
   function loadAlbums() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { 'Favorites': [] };
-    } catch { return { 'Favorites': [] }; }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { 'Favorites': [] }; }
+    catch { return { 'Favorites': [] }; }
   }
 
   function saveAlbums(data) {
@@ -694,23 +709,28 @@ body{
   }
 
   function isSaved(img) {
-    const data = loadAlbums();
-    const id = getImageId(img);
-    return Object.values(data).some(album =>
-      album.some(item => getImageId(item) === id)
-    );
+    var data = loadAlbums();
+    var id = getImageId(img);
+    for (var name in data) {
+      if (data[name].some(function(item) { return getImageId(item) === id; })) return true;
+    }
+    return false;
   }
 
   function toggleSave(imgData, albumName) {
-    const data = loadAlbums();
-    const id = getImageId(imgData);
-    for (const [name, items] of Object.entries(data)) {
-      if (items.some(item => getImageId(item) === id)) {
-        // Remove
-        data[name] = items.filter(item => getImageId(item) !== id);
-        if (data[name].length === 0 && name !== 'Favorites') delete data[name];
-        saveAlbums(data);
-        return { action: 'removed', album: name };
+    var data = loadAlbums();
+    var id = getImageId(imgData);
+    // Check if already saved in any album
+    for (var name in data) {
+      var items = data[name];
+      for (var i = 0; i < items.length; i++) {
+        if (getImageId(items[i]) === id) {
+          // Remove
+          items.splice(i, 1);
+          if (items.length === 0 && name !== 'Favorites') delete data[name];
+          saveAlbums(data);
+          return { action: 'removed', album: name };
+        }
       }
     }
     // Save
@@ -726,60 +746,146 @@ body{
   }
 
   function showToast(msg) {
-    const el = document.getElementById('toast');
+    var el = document.getElementById('toast');
     el.textContent = msg;
     el.classList.add('show');
     clearTimeout(el._timer);
-    el._timer = setTimeout(() => el.classList.remove('show'), 2200);
+    el._timer = setTimeout(function() { el.classList.remove('show'); }, 2200);
+  }
+
+  // ── album selector popup ─────────────────────
+  var activePopup = null;
+
+  document.addEventListener('click', function(e) {
+    if (activePopup && !activePopup.contains(e.target) && !e.target.closest('.action-btn.bookmark')) {
+      activePopup.classList.remove('open');
+      activePopup = null;
+    }
+  });
+
+  function showAlbumSelector(imgData, btn) {
+    var data = loadAlbums();
+    var albumNames = Object.keys(data);
+    var hasContent = albumNames.some(function(n) { return data[n].length > 0; });
+
+    if (!hasContent) {
+      // No albums with content - save to Favorites directly
+      var res = toggleSave(imgData, 'Favorites');
+      showToast(res.action === 'saved' ? t('toastSaved') + ' ' + res.album : t('toastRemoved') + ' ' + res.album);
+      updateAlbumsButton();
+      refreshBookmarks();
+      return;
+    }
+
+    // Close any existing popup
+    if (activePopup) { activePopup.classList.remove('open'); activePopup = null; }
+
+    // Build popup
+    var popup = document.createElement('div');
+    popup.className = 'album-popup open';
+    var html = '';
+    albumNames.forEach(function(name) {
+      var count = data[name].length;
+      var isChecked = data[name].some(function(item) { return getImageId(item) === getImageId(imgData); });
+      if (isChecked) {
+        // Already in this album - clicking removes it
+        html += '<div class="album-popup-item" data-action="remove" data-album="' + escAttr(name) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
+          '<span>' + esc(name) + ' (' + count + ')</span></div>';
+      } else {
+        html += '<div class="album-popup-item" data-action="save" data-album="' + escAttr(name) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
+          '<span>' + esc(name) + ' (' + count + ')</span></div>';
+      }
+    });
+    html += '<div class="album-popup-divider"></div>';
+    html += '<div class="album-popup-item" data-action="new">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      '<span>' + t('newAlbum') + '</span></div>';
+    popup.innerHTML = html;
+
+    // Position popup
+    var rect = btn.getBoundingClientRect();
+    popup.style.position = 'fixed';
+    popup.style.left = Math.max(4, rect.left) + 'px';
+    popup.style.top = (rect.bottom + 4) + 'px';
+
+    // Handle clicks on popup items
+    popup.addEventListener('click', function(e) {
+      var item = e.target.closest('.album-popup-item');
+      if (!item) return;
+      var action = item.dataset.action;
+      if (action === 'new') {
+        var name = prompt(t('albumsCreatePrompt'));
+        if (name && name.trim()) {
+          var d = loadAlbums();
+          if (!d[name.trim()]) d[name.trim()] = [];
+          saveAlbums(d);
+          var res = toggleSave(imgData, name.trim());
+          showToast(t('toastSaved') + ' ' + res.album);
+          updateAlbumsButton();
+          refreshBookmarks();
+        }
+      } else if (action === 'save') {
+        var res = toggleSave(imgData, item.dataset.album);
+        showToast(t('toastSaved') + ' ' + res.album);
+        updateAlbumsButton();
+        refreshBookmarks();
+      } else if (action === 'remove') {
+        var res = toggleSave(imgData, item.dataset.album);
+        showToast(t('toastRemoved') + ' ' + res.album);
+        updateAlbumsButton();
+        refreshBookmarks();
+      }
+      popup.classList.remove('open');
+      activePopup = null;
+    });
+
+    document.body.appendChild(popup);
+    activePopup = popup;
   }
 
   function openAlbumsModal() {
-    const overlay = document.getElementById('albumsOverlay');
-    const body = document.getElementById('albumsBody');
-    const data = loadAlbums();
-    const albumNames = Object.keys(data);
-    const hasContent = albumNames.some(n => data[n].length > 0);
+    var overlay = document.getElementById('albumsOverlay');
+    var body = document.getElementById('albumsBody');
+    var data = loadAlbums();
+    var albumNames = Object.keys(data);
 
-    if (!hasContent) {
-      body.innerHTML =
-        '<div class="albums-empty"><p>' + t('albumsEmpty') + '</p></div>' +
-        '<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">' + t('albumsCreate') + '</button></div>' +
-        '<div class="album-disclaimer">' + t('albumsDisclaimer') + '</div>';
-    } else {
-      let html = '';
-      for (const name of albumNames) {
-        const items = data[name];
-        if (items.length === 0) continue;
-        html += '<div class="album-group">' +
-          '<div class="album-head"><div><span class="album-name">' + esc(name) + '</span> <span class="album-count">' + items.length + '</span></div></div>' +
-          '<div class="album-grid">';
-        items.forEach(item => {
+    var html = '';
+    for (var i = 0; i < albumNames.length; i++) {
+      var name = albumNames[i];
+      var items = data[name];
+      html += '<div class="album-group">' +
+        '<div class="album-head"><div><span class="album-name">' + esc(name) + '</span> <span class="album-count">' + items.length + '</span></div></div>' +
+        '<div class="album-grid">';
+      if (items.length === 0) {
+        html += '<div class="album-empty-placeholder">' + t('albumEmptyLabel') + '</div>';
+      } else {
+        for (var j = 0; j < items.length; j++) {
+          var item = items[j];
           html += '<div class="album-img" data-url="' + escAttr(item.url || item.thumb) + '" data-album="' + escAttr(name) + '">' +
             '<img src="' + escAttr(item.thumb || item.url) + '" alt="' + esc(item.title) + '" loading="lazy">' +
-            '<button class="del-img" title="' + t('albumsDel') + '">✕</button>' +
-            '</div>';
-        });
-        html += '</div></div>';
+            '<button class="del-img" title="' + t('albumsDel') + '">✕</button></div>';
+        }
       }
-      html += '<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">' + t('albumsCreate') + '</button></div>';
-      html += '<div class="album-disclaimer">' + t('albumsDisclaimer') + '</div>';
-      body.innerHTML = html;
+      html += '</div></div>';
     }
+    html += '<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">' + t('albumsCreate') + '</button></div>';
+    html += '<div class="album-disclaimer">' + t('albumsDisclaimer') + '</div>';
+    body.innerHTML = html;
 
-    // Event delegation for album actions
+    // Event delegation
     body.onclick = function(e) {
-      const target = e.target;
-
-      // Delete image - use closest in case target is text child
-      const delBtn = target.closest('.del-img');
+      var target = e.target;
+      var delBtn = target.closest('.del-img');
       if (delBtn) {
         e.stopPropagation();
-        const imgDiv = delBtn.closest('.album-img');
+        var imgDiv = delBtn.closest('.album-img');
         if (!imgDiv) return;
-        const album = imgDiv.dataset.album;
-        const url = imgDiv.dataset.url;
-        const d = loadAlbums();
-        d[album] = d[album].filter(item => (item.url || item.thumb) !== url);
+        var album = imgDiv.dataset.album;
+        var url = imgDiv.dataset.url;
+        var d = loadAlbums();
+        d[album] = d[album].filter(function(item) { return (item.url || item.thumb) !== url; });
         if (d[album].length === 0 && album !== 'Favorites') delete d[album];
         saveAlbums(d);
         showToast(t('albumsRemoved') + ' ' + album);
@@ -789,12 +895,11 @@ body{
         return;
       }
 
-      // Create album button
-      const createBtn = target.closest('.create-album-btn');
+      var createBtn = target.closest('.create-album-btn');
       if (createBtn) {
-        const name = prompt(t('albumsCreatePrompt'));
+        var name = prompt(t('albumsCreatePrompt'));
         if (name && name.trim()) {
-          const d = loadAlbums();
+          var d = loadAlbums();
           if (!d[name.trim()]) d[name.trim()] = [];
           saveAlbums(d);
           openAlbumsModal();
@@ -802,8 +907,7 @@ body{
         return;
       }
 
-      // Open image
-      const imgDiv = target.closest('.album-img');
+      var imgDiv = target.closest('.album-img');
       if (imgDiv) {
         window.open(imgDiv.dataset.url, '_blank');
         return;
@@ -813,43 +917,42 @@ body{
     overlay.classList.add('open');
   }
 
-  // Clean up onclick when closing modal
-  document.getElementById('albumsClose').addEventListener('click', () => {
+  document.getElementById('albumsClose').addEventListener('click', function() {
     document.getElementById('albumsOverlay').classList.remove('open');
     document.getElementById('albumsBody').onclick = null;
   });
-  document.getElementById('albumsOverlay').addEventListener('click', e => {
+  document.getElementById('albumsOverlay').addEventListener('click', function(e) {
     if (e.target === e.currentTarget) {
       e.target.classList.remove('open');
       document.getElementById('albumsBody').onclick = null;
     }
   });
 
-  function updateAlbumsButton() {
-    const btn = document.getElementById('btnAlbums');
-    const data = loadAlbums();
-    btn.classList.toggle('has-saved', Object.values(data).some(arr => arr.length > 0));
-  }
-
   document.getElementById('btnAlbums').addEventListener('click', openAlbumsModal);
 
+  function updateAlbumsButton() {
+    var btn = document.getElementById('btnAlbums');
+    var data = loadAlbums();
+    btn.classList.toggle('has-saved', Object.values(data).some(function(arr) { return arr.length > 0; }));
+  }
+
   function refreshBookmarks() {
-    document.querySelectorAll('.action-btn.bookmark').forEach(btn => {
-      const card = btn.closest('.card');
-      const imgData = card ? card._imgData : null;
+    document.querySelectorAll('.action-btn.bookmark').forEach(function(btn) {
+      var card = btn.closest('.card');
+      var imgData = card ? card._imgData : null;
       if (imgData) {
-        const saved = isSaved(imgData);
+        var saved = isSaved(imgData);
         btn.classList.toggle('saved', saved);
         btn.title = saved ? t('bookmarkSaved') : t('bookmark');
       }
     });
   }
 
-  // Ribbon icon (liston)
-  const RIBBON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  // Ribbon icon
+  var RIBBON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
 
   // ── mark viewed ──────────────────────────────
-  let viewedEnabled = false;
+  var viewedEnabled = false;
 
   function loadViewed() {
     try { return JSON.parse(localStorage.getItem(VIEWED_KEY)) || []; }
@@ -862,7 +965,7 @@ body{
 
   function markViewed(url) {
     if (!url) return;
-    const list = loadViewed();
+    var list = loadViewed();
     if (!list.includes(url)) {
       list.push(url);
       saveViewed(list);
@@ -875,13 +978,13 @@ body{
   }
 
   function applyViewedState() {
-    document.querySelectorAll('.card').forEach(card => {
-      const url = card._imgData ? (card._imgData.url || card._imgData.thumb) : '';
+    document.querySelectorAll('.card').forEach(function(card) {
+      var url = card._imgData ? (card._imgData.url || card._imgData.thumb) : '';
       card.classList.toggle('viewed', isViewed(url));
     });
   }
 
-  document.getElementById('btnViewed').addEventListener('click', () => {
+  document.getElementById('btnViewed').addEventListener('click', function() {
     viewedEnabled = !viewedEnabled;
     document.getElementById('btnViewed').classList.toggle('on', viewedEnabled);
     document.getElementById('viewedBtnText').textContent = viewedEnabled ? t('viewedOn') : t('viewedLabel');
@@ -889,7 +992,7 @@ body{
   });
 
   // ── random terms ─────────────────────────────
-  const RANDOM_TERMS = [
+  var RANDOM_TERMS = [
     'portrait','landscape','architecture','nature','abstract',
     'city','ocean','forest','sunset','flowers',
     'texture','pattern','wildlife','space','technology',
@@ -906,51 +1009,51 @@ body{
   ];
 
   // ── API ──────────────────────────────────────
-  const PER_PAGE = 20;
+  var PER_PAGE = 20;
 
-  let currentQuery = '';
-  let currentPage = 1;
-  let activeFilter = 'cc0,pdm';
-  let activeSource = 'all';
-  let totalResults = 0;
-  let showing = 0;
-  let loading = false;
-  let srcPage = { openverse: 1, wikimedia: 1 };
+  var currentQuery = '';
+  var currentPage = 1;
+  var activeFilter = 'cc0,pdm';
+  var activeSource = 'all';
+  var totalResults = 0;
+  var showing = 0;
+  var loading = false;
+  var srcPage = { openverse: 1, wikimedia: 1 };
 
-  const $ = id => document.getElementById(id);
-  const gallery = $('gallery');
-  const info = $('info');
-  const empty = $('empty');
-  const loadWrap = $('loadWrap');
-  const btnLoad = $('btnLoad');
-  const btnSearch = $('btnSearch');
-  const btnRandom = $('btnRandom');
-  const queryEl = $('query');
-  const chips = document.querySelectorAll('.chip');
-  const srcChips = document.querySelectorAll('.source-chip');
+  var $ = function(id) { return document.getElementById(id); };
+  var gallery = $('gallery');
+  var info = $('info');
+  var empty = $('empty');
+  var loadWrap = $('loadWrap');
+  var btnLoad = $('btnLoad');
+  var btnSearch = $('btnSearch');
+  var btnRandom = $('btnRandom');
+  var queryEl = $('query');
+  var chips = document.querySelectorAll('.chip');
+  var srcChips = document.querySelectorAll('.source-chip');
 
-  const ICONS = {
+  var ICONS = {
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
     link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
     dl:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
     star: RIBBON_ICON,
   };
 
-  document.getElementById('langEn').addEventListener('click', () => setLang('en'));
-  document.getElementById('langEs').addEventListener('click', () => setLang('es'));
+  document.getElementById('langEn').addEventListener('click', function() { setLang('en'); });
+  document.getElementById('langEs').addEventListener('click', function() { setLang('es'); });
 
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chips.forEach(c => c.classList.remove('active'));
+  chips.forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      chips.forEach(function(c) { c.classList.remove('active'); });
       chip.classList.add('active');
       activeFilter = chip.dataset.filter;
       if (currentQuery) doSearch();
     });
   });
 
-  srcChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      srcChips.forEach(c => c.classList.remove('active'));
+  srcChips.forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      srcChips.forEach(function(c) { c.classList.remove('active'); });
       chip.classList.add('active');
       activeSource = chip.dataset.source;
       if (currentQuery) doSearch();
@@ -958,12 +1061,10 @@ body{
   });
 
   // ── random search ────────────────────────────
-  btnRandom.addEventListener('click', () => {
-    const words = RANDOM_TERMS;
-    const single = words[Math.floor(Math.random() * words.length)];
-    const term = Math.random() < 0.5
-      ? single
-      : single + ' ' + words[Math.floor(Math.random() * words.length)];
+  btnRandom.addEventListener('click', function() {
+    var words = RANDOM_TERMS;
+    var single = words[Math.floor(Math.random() * words.length)];
+    var term = Math.random() < 0.5 ? single : single + ' ' + words[Math.floor(Math.random() * words.length)];
     queryEl.value = term;
     doSearch();
   });
@@ -971,73 +1072,68 @@ body{
   // ── source search implementations ────────────
 
   async function searchOpenverse(query, page, append) {
-    const params = new URLSearchParams({
+    var params = new URLSearchParams({
       q: query, license: activeFilter,
       page: String(page), page_size: String(PER_PAGE),
     });
-    const res = await fetch('https://api.openverse.org/v1/images?' + params);
+    var res = await fetch('https://api.openverse.org/v1/images?' + params);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    var data = await res.json();
     return {
-      results: (data.results || []).map(img => ({
+      results: (data.results || []).map(function(img) { return {
         type: 'openverse', title: img.title || '', thumb: img.url || img.thumbnail || '',
         url: img.url || '', pageUrl: img.foreign_landing_url || '',
         author: img.creator || '', authUrl: img.creator_url || '',
         provider: img.provider || '', license: img.license || '', licVer: img.license_version || '',
-      })),
+      }; }),
       total: data.result_count || 0, page: page,
     };
   }
 
   async function searchWikimedia(query, page, append) {
-    const perPage = PER_PAGE;
-    const offset = (page - 1) * perPage;
-
-    const searchParams = new URLSearchParams({
+    var perPage = PER_PAGE;
+    var offset = (page - 1) * perPage;
+    var searchParams = new URLSearchParams({
       action: 'query', list: 'search', srnamespace: '6',
       srsearch: query, srlimit: String(perPage), sroffset: String(offset),
       format: 'json', origin: '*',
     });
-    const searchRes = await fetch('https://commons.wikimedia.org/w/api.php?' + searchParams, {
+    var searchRes = await fetch('https://commons.wikimedia.org/w/api.php?' + searchParams, {
       headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0 (https://github.com/juanaustral/freelicense-image-finder)' }
     });
     if (!searchRes.ok) throw new Error('Wikimedia search HTTP ' + searchRes.status);
-    const searchData = await searchRes.json();
-
-    const hits = searchData.query?.search || [];
-    const total = searchData.query?.searchinfo?.totalhits || 0;
+    var searchData = await searchRes.json();
+    var hits = searchData.query?.search || [];
+    var total = searchData.query?.searchinfo?.totalhits || 0;
     if (hits.length === 0) return { results: [], total: 0, page: page };
-
-    const titles = hits.map(h => h.title).join('|');
-    const infoParams = new URLSearchParams({
+    var titles = hits.map(function(h) { return h.title; }).join('|');
+    var infoParams = new URLSearchParams({
       action: 'query', prop: 'imageinfo', iiprop: 'url|extmetadata',
       titles: titles, format: 'json', origin: '*',
     });
-    const infoRes = await fetch('https://commons.wikimedia.org/w/api.php?' + infoParams, {
+    var infoRes = await fetch('https://commons.wikimedia.org/w/api.php?' + infoParams, {
       headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0' }
     });
     if (!infoRes.ok) throw new Error('Wikimedia info HTTP ' + infoRes.status);
-    const infoData = await infoRes.json();
-
-    const pages = infoData.query?.pages || {};
-    const results = [];
-
-    for (const hit of hits) {
-      const pageId = Object.keys(pages).find(pid => pages[pid].title === hit.title);
+    var infoData = await infoRes.json();
+    var pages = infoData.query?.pages || {};
+    var results = [];
+    for (var hi = 0; hi < hits.length; hi++) {
+      var hit = hits[hi];
+      var pageId = Object.keys(pages).find(function(pid) { return pages[pid].title === hit.title; });
       if (!pageId) continue;
-      const pg = pages[pageId];
+      var pg = pages[pageId];
       if (!pg.imageinfo || !pg.imageinfo[0]) continue;
-      const ii = pg.imageinfo[0];
-      const meta = ii.extmetadata || {};
-      const licShort = (meta.LicenseShortName?.value || '').toLowerCase();
-      const copyrighted = (meta.Copyrighted?.value || '').toLowerCase();
-      const isCC0 = licShort.includes('cc0') || licShort.includes('cc 0');
-      const isPD = licShort.includes('public domain') || copyrighted === 'false' || licShort.includes('pdm');
+      var ii = pg.imageinfo[0];
+      var meta = ii.extmetadata || {};
+      var licShort = (meta.LicenseShortName?.value || '').toLowerCase();
+      var copyrighted = (meta.Copyrighted?.value || '').toLowerCase();
+      var isCC0 = licShort.includes('cc0') || licShort.includes('cc 0');
+      var isPD = licShort.includes('public domain') || copyrighted === 'false' || licShort.includes('pdm');
       if (activeFilter === 'cc0' && !isCC0) continue;
       if (activeFilter === 'pdm' && !isPD) continue;
       if (activeFilter === 'cc0,pdm' && !isCC0 && !isPD) continue;
-
-      const artist = meta.Artist?.value || '';
+      var artist = meta.Artist?.value || '';
       results.push({
         type: 'wikimedia',
         title: meta.ObjectName?.value || meta.ImageDescription?.value || hit.title.replace(/^File:/,'').replace(/\.\w+$/,''),
@@ -1055,10 +1151,8 @@ body{
     if (!query.trim() || loading) return;
     loading = true;
     btnSearch.disabled = true;
-
     currentQuery = query.trim();
     currentPage = page;
-
     if (!append) {
       gallery.innerHTML = '';
       loadWrap.style.display = 'none';
@@ -1066,40 +1160,29 @@ body{
       info.textContent = t('searching');
       srcPage = { openverse: 1, wikimedia: 1 };
     }
-
     btnLoad.classList.add('loading');
-
     try {
-      let allResults = [];
-      let maxTotal = 0;
-      let errors = [];
-
+      var allResults = [];
+      var maxTotal = 0;
+      var errors = [];
       if (activeSource === 'openverse' || activeSource === 'all') {
         try {
-          const ovPage = activeSource === 'all' ? srcPage.openverse : page;
-          const ov = await searchOpenverse(query, ovPage, append);
+          var ovPage = activeSource === 'all' ? srcPage.openverse : page;
+          var ov = await searchOpenverse(query, ovPage, append);
           allResults = allResults.concat(ov.results);
           maxTotal += ov.total;
           if (activeSource === 'all') srcPage.openverse++;
-        } catch (e) {
-          errors.push('Openverse: ' + e.message);
-          console.error('Openverse error:', e);
-        }
+        } catch (e) { errors.push('Openverse: ' + e.message); console.error('Openverse error:', e); }
       }
-
       if (activeSource === 'wikimedia' || activeSource === 'all') {
         try {
-          const wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
-          const wm = await searchWikimedia(query, wmPage, append);
+          var wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
+          var wm = await searchWikimedia(query, wmPage, append);
           allResults = allResults.concat(wm.results);
           maxTotal += wm.total;
           if (activeSource === 'all') srcPage.wikimedia++;
-        } catch (e) {
-          errors.push('Wikimedia Commons: ' + e.message);
-          console.error('Wikimedia error:', e);
-        }
+        } catch (e) { errors.push('Wikimedia Commons: ' + e.message); console.error('Wikimedia error:', e); }
       }
-
       if (allResults.length === 0 && !append) {
         empty.innerHTML = '<p>' + t('noRes') + ' <strong>' + esc(query) + '</strong>.</p><p style="font-size:12px">' + t('try') + '</p>' +
           (errors.length ? '<p style="font-size:11px;color:#a8a29e;margin-top:8px">' + errors.join('; ') + '</p>' : '');
@@ -1107,23 +1190,17 @@ body{
         info.textContent = '';
         return;
       }
-
       render(allResults, append);
       showing = gallery.children.length;
       totalResults = maxTotal;
       updateInfo();
-
-      const gotAll = allResults.length < PER_PAGE;
-      const hasMore = activeSource === 'all' ? !gotAll : showing < maxTotal;
+      var gotAll = allResults.length < PER_PAGE;
+      var hasMore = activeSource === 'all' ? !gotAll : showing < maxTotal;
       loadWrap.style.display = (hasMore && allResults.length > 0) ? 'block' : 'none';
-
     } catch (err) {
       info.textContent = t('err');
       console.error(err);
-      if (!append) {
-        empty.innerHTML = '<p>' + t('err') + '</p>';
-        empty.style.display = 'block';
-      }
+      if (!append) { empty.innerHTML = '<p>' + t('err') + '</p>'; empty.style.display = 'block'; }
     } finally {
       loading = false;
       btnLoad.classList.remove('loading');
@@ -1132,42 +1209,40 @@ body{
   }
 
   function updateInfo() {
-    const licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
-    const srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
+    var licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
+    var srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
     info.textContent = showing + ' ' + t('of') + ' ' + totalResults + ' ' + t('results') + ' "' + esc(currentQuery) + '"' +
       (licLabel ? ' · ' + licLabel : '') + ' · ' + srcLabel;
   }
 
   function render(hits, append) {
-    const frag = document.createDocumentFragment();
-    hits.forEach(img => {
-      const title   = img.title || 'Sin título';
-      const thumb   = img.thumb || '';
-      const author  = img.author || '';
-      const authUrl = img.authUrl || '';
-      const prov    = img.provider || '';
-      const license = img.license || '';
-      const licVer  = img.licVer || '';
-      const licStr  = license ? license.toUpperCase() + ' ' + licVer : 'Libre';
-      const pageUrl = img.pageUrl || '';
-      const imgUrl  = img.url || '';
+    var frag = document.createDocumentFragment();
+    hits.forEach(function(img) {
+      var title   = img.title || 'Sin titulo';
+      var thumb   = img.thumb || '';
+      var author  = img.author || '';
+      var authUrl = img.authUrl || '';
+      var prov    = img.provider || '';
+      var license = img.license || '';
+      var licVer  = img.licVer || '';
+      var licStr  = license ? license.toUpperCase() + ' ' + licVer : 'Libre';
+      var pageUrl = img.pageUrl || '';
+      var imgUrl  = img.url || '';
 
-      const card = document.createElement('div');
+      var card = document.createElement('div');
       card.className = 'card';
       card._imgData = img;
 
-      // Mark viewed on page load if active
-      const viewUrl = imgUrl || thumb;
+      var viewUrl = imgUrl || thumb;
       if (viewedEnabled && isViewed(viewUrl)) card.classList.add('viewed');
 
-      const imgDiv = document.createElement('div');
+      var imgDiv = document.createElement('div');
       imgDiv.className = 'card-img';
-      const elImg = document.createElement('img');
+      var elImg = document.createElement('img');
       elImg.src = thumb;
       elImg.alt = title;
       elImg.loading = 'lazy';
-      if (imgUrl) imgDiv.addEventListener('click', () => {
-        // Mark as viewed when clicked
+      if (imgUrl) imgDiv.addEventListener('click', function() {
         if (viewedEnabled) {
           markViewed(imgUrl || thumb);
           card.classList.add('viewed');
@@ -1176,44 +1251,62 @@ body{
       });
       imgDiv.appendChild(elImg);
 
-      const foot = document.createElement('div');
+      var foot = document.createElement('div');
       foot.className = 'card-foot';
 
-      const meta = document.createElement('div');
+      var meta = document.createElement('div');
       meta.className = 'card-meta';
-      const authorSpan = document.createElement('span');
+      var authorSpan = document.createElement('span');
       authorSpan.className = 'author';
       if (author && authUrl) {
         authorSpan.innerHTML = '<a href="' + escAttr(authUrl) + '" target="_blank" rel="noopener">' + esc(author) + '</a>';
       } else if (author) {
         authorSpan.textContent = author;
       }
-      const licSpan = document.createElement('span');
+      var licSpan = document.createElement('span');
       licSpan.className = 'license';
       licSpan.textContent = licStr + (prov ? ' · ' + prov : '');
       meta.appendChild(authorSpan);
       meta.appendChild(licSpan);
 
-      const actions = document.createElement('div');
+      var actions = document.createElement('div');
       actions.className = 'card-actions';
 
       // Bookmark button
-      const saved = isSaved(img);
-      const bmBtn = btnAction(ICONS.star, saved ? t('bookmarkSaved') : t('bookmark'), function() {
-        const res = toggleSave(img, 'Favorites');
-        showToast(res.action === 'saved' ? t('toastSaved') : t('toastRemoved'));
-        updateAlbumsButton();
-        refreshBookmarks();
+      var bmBtn = document.createElement('button');
+      bmBtn.className = 'action-btn bookmark';
+      bmBtn.title = t('bookmark');
+      bmBtn.innerHTML = ICONS.star;
+      bmBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showAlbumSelector(img, bmBtn);
       });
-      bmBtn.classList.add('bookmark');
-      if (saved) bmBtn.classList.add('saved');
+      if (isSaved(img)) bmBtn.classList.add('saved');
       actions.appendChild(bmBtn);
 
-      if (pageUrl) actions.appendChild(btnAction(ICONS.eye, t('btnView'), function() { window.open(pageUrl, '_blank'); }));
+      if (pageUrl) {
+        var eyeBtn = document.createElement('button');
+        eyeBtn.className = 'action-btn';
+        eyeBtn.title = t('btnView');
+        eyeBtn.innerHTML = ICONS.eye;
+        eyeBtn.addEventListener('click', function(e) { e.stopPropagation(); window.open(pageUrl, '_blank'); });
+        actions.appendChild(eyeBtn);
+      }
       if (imgUrl) {
-        actions.appendChild(btnAction(ICONS.link, t('btnLink'), function() { window.open(imgUrl, '_blank'); }));
-        const fname = title.replace(/[^a-z0-9_\-]/gi,'_').substring(0,40) + '.jpg';
-        actions.appendChild(btnAction(ICONS.dl, t('btnDl'), function() { downloadImg(imgUrl, fname); }));
+        var linkBtn = document.createElement('button');
+        linkBtn.className = 'action-btn';
+        linkBtn.title = t('btnLink');
+        linkBtn.innerHTML = ICONS.link;
+        linkBtn.addEventListener('click', function(e) { e.stopPropagation(); window.open(imgUrl, '_blank'); });
+        actions.appendChild(linkBtn);
+
+        var dlBtn = document.createElement('button');
+        dlBtn.className = 'action-btn';
+        dlBtn.title = t('btnDl');
+        dlBtn.innerHTML = ICONS.dl;
+        var fname = title.replace(/[^a-z0-9_\-]/gi,'_').substring(0,40) + '.jpg';
+        dlBtn.addEventListener('click', function(e) { e.stopPropagation(); downloadImg(imgUrl, fname); });
+        actions.appendChild(dlBtn);
       }
 
       foot.appendChild(meta);
@@ -1225,37 +1318,26 @@ body{
     gallery.appendChild(frag);
   }
 
-  function btnAction(svg, title, onclick) {
-    const btn = document.createElement('button');
-    btn.className = 'action-btn';
-    btn.title = title;
-    btn.innerHTML = svg;
-    btn.addEventListener('click', function(e) { e.stopPropagation(); onclick(); });
-    return btn;
-  }
-
   async function downloadImg(url, filename) {
     try {
-      const res = await fetch(url, { mode: 'cors' });
+      var res = await fetch(url, { mode: 'cors' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const blob = await res.blob();
-      const ext = blob.type === 'image/png' ? '.png' : blob.type === 'image/gif' ? '.gif' : '.jpg';
-      const name = filename.replace(/\.\w+$/, '') + ext;
-      const a = document.createElement('a');
+      var blob = await res.blob();
+      var ext = blob.type === 'image/png' ? '.png' : blob.type === 'image/gif' ? '.gif' : '.jpg';
+      var name = filename.replace(/\.\w+$/, '') + ext;
+      var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = name;
       document.body.appendChild(a);
       a.click();
       a.remove();
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
-    } catch {
-      window.open(url, '_blank');
-    }
+    } catch { window.open(url, '_blank'); }
   }
 
   function esc(str) {
     if (!str) return '';
-    const d = document.createElement('div');
+    var d = document.createElement('div');
     d.textContent = String(str);
     return d.innerHTML;
   }
@@ -1264,12 +1346,12 @@ body{
     return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  const doSearch = function() {
+  var doSearch = function() {
     currentPage = 1;
     srcPage = { openverse: 1, wikimedia: 1 };
     search(queryEl.value, 1, false);
   };
-  const loadMore = function() { search(currentQuery, currentPage + 1, true); };
+  var loadMore = function() { search(currentQuery, currentPage + 1, true); };
 
   btnSearch.addEventListener('click', doSearch);
   queryEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
