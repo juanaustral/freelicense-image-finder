@@ -190,6 +190,16 @@ body{
 .btn-albums:hover{border-color:var(--accent);color:var(--accent)}
 .btn-albums.has-saved{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 .btn-albums svg{width:12px;height:12px}
+/* viewed toggle */
+.btn-viewed{
+  padding:4px 11px;border:1px solid var(--border);border-radius:20px;
+  font-size:11px;font-weight:600;cursor:pointer;background:var(--surface);
+  color:var(--text-dim);transition:all .18s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-viewed:hover{border-color:var(--accent);color:var(--accent)}
+.btn-viewed.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.btn-viewed svg{width:12px;height:12px}
 
 /* info */
 .info{font-size:12px;color:var(--text-dim);margin-bottom:16px;min-height:18px}
@@ -205,9 +215,11 @@ body{
 .card{
   background:var(--surface);border-radius:var(--radius);
   overflow:hidden;box-shadow:var(--shadow);
-  transition:box-shadow .25s,transform .2s;
+  transition:box-shadow .25s,transform .2s,opacity .4s;
 }
 .card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.card.viewed{opacity:.4}
+.card.viewed:hover{opacity:.55}
 .card-img{
   aspect-ratio:4/3;overflow:hidden;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
@@ -248,7 +260,7 @@ body{
 }
 .action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 .action-btn svg{width:13px;height:13px;display:block}
-/* bookmark star */
+/* bookmark ribbon */
 .action-btn.bookmark{color:var(--text-muted)}
 .action-btn.bookmark.saved{color:#f59e0b;border-color:#f59e0b}
 .action-btn.bookmark.saved:hover{background:#fffbeb;border-color:#f59e0b;color:#d97706}
@@ -370,14 +382,6 @@ body{
 .create-album-btn:hover{border-color:var(--accent);color:var(--accent)}
 .album-disclaimer{margin-top:16px;font-size:10px;color:var(--text-muted);text-align:center;border-top:1px solid var(--border);padding-top:12px}
 
-/* ── album selector popup ─────────────────── */
-.album-popup{position:absolute;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 30px rgba(0,0,0,.1);padding:6px;min-width:160px;display:none}
-.album-popup.open{display:block}
-.album-popup-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;font-size:11px;cursor:pointer;color:var(--text-dim);transition:all .1s;white-space:nowrap;border:none;background:transparent;width:100%;font-family:inherit;text-align:left}
-.album-popup-item:hover{background:var(--accent-light);color:var(--accent)}
-.album-popup-item svg{width:12px;height:12px}
-.album-popup-divider{height:1px;background:var(--border);margin:4px 6px}
-
 /* ── toast ────────────────────────────────── */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);z-index:1000;background:var(--text);color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -456,6 +460,10 @@ body{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
       <span id="albumsBtnText">My Albums</span>
     </button>
+    <button class="btn-viewed" id="btnViewed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="viewedBtnText">Mark Viewed</span>
+    </button>
   </div>
 
   <div class="info" id="info"></div>
@@ -473,7 +481,7 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.4.0</span>
+      <span class="fv-num" id="versionNum">v1.5.0</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
@@ -548,9 +556,12 @@ body{
       albumsSaved:'Saved to',
       albumsRemoved:'Removed from',
       albumsDisclaimer:'Albums are stored locally in your browser. They may be lost if you clear your browsing data.',
-      newAlbum:'New Album',
+      newAlbum:'+ New Album',
       toastSaved:'Saved to Favorites',
       toastRemoved:'Removed from Favorites',
+      viewedLabel:'Mark Viewed',
+      viewedOn:'Mark Viewed ON',
+      viewedOff:'Mark Viewed OFF',
     },
     es: {
       title: 'FreeLicense Image Finder',
@@ -590,9 +601,12 @@ body{
       albumsSaved:'Guardado en',
       albumsRemoved:'Eliminado de',
       albumsDisclaimer:'Los albumes se guardan localmente en tu navegador. Pueden perderse si borras los datos de navegacion.',
-      newAlbum:'Nuevo Album',
+      newAlbum:'+ Nuevo Album',
       toastSaved:'Guardado en Favoritos',
       toastRemoved:'Eliminado de Favoritos',
+      viewedLabel:'Marcar Vistas',
+      viewedOn:'Marcar Vistas ON',
+      viewedOff:'Marcar Vistas OFF',
     }
   };
 
@@ -622,13 +636,15 @@ body{
     document.getElementById('albumsLabel').textContent = t('albumsLabel');
     document.getElementById('albumsBtnText').textContent = t('albumsBtn');
     document.getElementById('albumsTitle').textContent = t('albumsTitle');
+    document.getElementById('viewedBtnText').textContent = t('viewedLabel');
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
     if (currentQuery) updateInfo();
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.4.0';
+  const VERSION = 'v1.5.0';
   const CHANGELOG = [
+    {v:'1.5.0', date:'2026-07-04', text:'Ribbon icon, Mark Viewed toggle, New Album fix. Albumes ahora con liston icono y opacidad en imagenes vistas.'},
     {v:'1.4.0', date:'2026-07-04', text:'Albumes locales: guardar imagenes en Favoritos con localStorage. Disclaimers de almacenamiento local.'},
     {v:'1.3.1', date:'2026-07-04', text:'Removido Met Museum. Random Search genera terminos de 1 o 2 palabras.'},
     {v:'1.3.0', date:'2026-07-04', text:'Agregada API del Met Museum como tercera fuente de imagenes'},
@@ -661,6 +677,7 @@ body{
 
   // ── albums ───────────────────────────────────
   const STORAGE_KEY = 'flif_albums';
+  const VIEWED_KEY = 'flif_viewed';
 
   function loadAlbums() {
     try {
@@ -684,46 +701,28 @@ body{
     );
   }
 
-  function findAlbumContaining(img) {
-    const data = loadAlbums();
-    const id = getImageId(img);
-    for (const [name, items] of Object.entries(data)) {
-      if (items.some(item => getImageId(item) === id)) return name;
-    }
-    return null;
-  }
-
   function toggleSave(imgData, albumName) {
     const data = loadAlbums();
     const id = getImageId(imgData);
-    const existing = findAlbumContaining(imgData);
-
-    if (existing) {
-      // Remove
-      data[existing] = data[existing].filter(item => getImageId(item) !== id);
-      if (data[existing].length === 0 && existing !== 'Favorites') {
-        delete data[existing];
+    for (const [name, items] of Object.entries(data)) {
+      if (items.some(item => getImageId(item) === id)) {
+        // Remove
+        data[name] = items.filter(item => getImageId(item) !== id);
+        if (data[name].length === 0 && name !== 'Favorites') delete data[name];
+        saveAlbums(data);
+        return { action: 'removed', album: name };
       }
-      saveAlbums(data);
-      return { action: 'removed', album: existing };
-    } else {
-      // Save
-      if (!data[albumName]) data[albumName] = [];
-      data[albumName].push({
-        title: imgData.title,
-        thumb: imgData.thumb,
-        url: imgData.url,
-        pageUrl: imgData.pageUrl,
-        author: imgData.author,
-        authUrl: imgData.authUrl,
-        provider: imgData.provider,
-        license: imgData.license,
-        licVer: imgData.licVer,
-        savedAt: new Date().toISOString(),
-      });
-      saveAlbums(data);
-      return { action: 'saved', album: albumName };
     }
+    // Save
+    if (!data[albumName]) data[albumName] = [];
+    data[albumName].push({
+      title: imgData.title, thumb: imgData.thumb, url: imgData.url,
+      pageUrl: imgData.pageUrl, author: imgData.author, authUrl: imgData.authUrl,
+      provider: imgData.provider, license: imgData.license, licVer: imgData.licVer,
+      savedAt: new Date().toISOString(),
+    });
+    saveAlbums(data);
+    return { action: 'saved', album: albumName };
   }
 
   function showToast(msg) {
@@ -734,110 +733,155 @@ body{
     el._timer = setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  // albums button
-  document.getElementById('btnAlbums').addEventListener('click', openAlbumsModal);
-
   function openAlbumsModal() {
     const overlay = document.getElementById('albumsOverlay');
     const body = document.getElementById('albumsBody');
     const data = loadAlbums();
     const albumNames = Object.keys(data);
+    const hasContent = albumNames.some(n => data[n].length > 0);
 
-    if (albumNames.length === 0 || albumNames.every(n => data[n].length === 0)) {
-      body.innerHTML = `<div class="albums-empty"><p>${t('albumsEmpty')}</p></div>` +
-        `<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">${t('albumsCreate')}</button></div>` +
-        `<div class="album-disclaimer">${t('albumsDisclaimer')}</div>`;
+    if (!hasContent) {
+      body.innerHTML =
+        '<div class="albums-empty"><p>' + t('albumsEmpty') + '</p></div>' +
+        '<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">' + t('albumsCreate') + '</button></div>' +
+        '<div class="album-disclaimer">' + t('albumsDisclaimer') + '</div>';
     } else {
       let html = '';
       for (const name of albumNames) {
         const items = data[name];
         if (items.length === 0) continue;
-        html += `<div class="album-group">
-          <div class="album-head">
-            <div>
-              <span class="album-name">${esc(name)}</span>
-              <span class="album-count">${items.length}</span>
-            </div>
-            <button class="create-album-btn" style="font-size:10px;padding:3px 8px;border-style:solid" onclick="(function(){document.getElementById('albumsBody').querySelector('#createAlbumBtn2')?.click()})()">${t('newAlbum')}</button>
-          </div>
-          <div class="album-grid">`;
+        html += '<div class="album-group">' +
+          '<div class="album-head"><div><span class="album-name">' + esc(name) + '</span> <span class="album-count">' + items.length + '</span></div></div>' +
+          '<div class="album-grid">';
         items.forEach(item => {
-          html += `<div class="album-img" onclick="window.open('${escAttr(item.url || '')}','_blank')">
-            <img src="${escAttr(item.thumb || item.url)}" alt="${esc(item.title)}" loading="lazy">
-            <button class="del-img" data-album="${escAttr(name)}" data-url="${escAttr(item.url || item.thumb)}" title="${t('albumsDel')}">✕</button>
-          </div>`;
+          html += '<div class="album-img" data-url="' + escAttr(item.url || item.thumb) + '" data-album="' + escAttr(name) + '">' +
+            '<img src="' + escAttr(item.thumb || item.url) + '" alt="' + esc(item.title) + '" loading="lazy">' +
+            '<button class="del-img" title="' + t('albumsDel') + '">✕</button>' +
+            '</div>';
         });
-        html += `</div></div>`;
+        html += '</div></div>';
       }
-      html += `<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn2">${t('albumsCreate')}</button></div>`;
-      html += `<div class="album-disclaimer">${t('albumsDisclaimer')}</div>`;
+      html += '<div style="text-align:center;margin-top:8px"><button class="create-album-btn" id="createAlbumBtn">' + t('albumsCreate') + '</button></div>';
+      html += '<div class="album-disclaimer">' + t('albumsDisclaimer') + '</div>';
       body.innerHTML = html;
-
-      // Delete handlers
-      body.querySelectorAll('.del-img').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const album = btn.dataset.album;
-          const url = btn.dataset.url;
-          const data2 = loadAlbums();
-          data2[album] = data2[album].filter(item => (item.url || item.thumb) !== url);
-          if (data2[album].length === 0 && album !== 'Favorites') delete data2[album];
-          saveAlbums(data2);
-          showToast(t('albumsRemoved') + ' ' + album);
-          updateAlbumsButton();
-          refreshBookmarks();
-          openAlbumsModal(); // refresh view
-        });
-      });
     }
 
-    // Create album handler
-    setTimeout(() => {
-      const btns = body.querySelectorAll('[id^="createAlbumBtn"]');
-      btns.forEach(btn => {
-        btn.onclick = () => {
-          const name = prompt(t('albumsCreatePrompt'));
-          if (name && name.trim()) {
-            const d = loadAlbums();
-            if (!d[name.trim()]) d[name.trim()] = [];
-            saveAlbums(d);
-            openAlbumsModal();
-          }
-        };
-      });
-    }, 0);
+    // Event delegation for album actions
+    body.onclick = function(e) {
+      const target = e.target;
+
+      // Delete image
+      if (target.classList.contains('del-img')) {
+        e.stopPropagation();
+        const imgDiv = target.closest('.album-img');
+        const album = imgDiv.dataset.album;
+        const url = imgDiv.dataset.url;
+        const d = loadAlbums();
+        d[album] = d[album].filter(item => (item.url || item.thumb) !== url);
+        if (d[album].length === 0 && album !== 'Favorites') delete d[album];
+        saveAlbums(d);
+        showToast(t('albumsRemoved') + ' ' + album);
+        updateAlbumsButton();
+        refreshBookmarks();
+        openAlbumsModal();
+        return;
+      }
+
+      // Open image
+      if (target.closest('.album-img')) {
+        const imgDiv = target.closest('.album-img');
+        window.open(imgDiv.dataset.url, '_blank');
+        return;
+      }
+
+      // Create album
+      if (target.classList.contains('create-album-btn')) {
+        const name = prompt(t('albumsCreatePrompt'));
+        if (name && name.trim()) {
+          const d = loadAlbums();
+          if (!d[name.trim()]) d[name.trim()] = [];
+          saveAlbums(d);
+          openAlbumsModal();
+        }
+        return;
+      }
+    };
 
     overlay.classList.add('open');
   }
 
+  // Clean up onclick when closing modal
   document.getElementById('albumsClose').addEventListener('click', () => {
     document.getElementById('albumsOverlay').classList.remove('open');
+    document.getElementById('albumsBody').onclick = null;
   });
   document.getElementById('albumsOverlay').addEventListener('click', e => {
-    if (e.target === e.currentTarget) e.target.classList.remove('open');
+    if (e.target === e.currentTarget) {
+      e.target.classList.remove('open');
+      document.getElementById('albumsBody').onclick = null;
+    }
   });
 
   function updateAlbumsButton() {
     const btn = document.getElementById('btnAlbums');
     const data = loadAlbums();
-    const hasAny = Object.values(data).some(arr => arr.length > 0);
-    btn.classList.toggle('has-saved', hasAny);
+    btn.classList.toggle('has-saved', Object.values(data).some(arr => arr.length > 0));
   }
 
   function refreshBookmarks() {
     document.querySelectorAll('.action-btn.bookmark').forEach(btn => {
-      const index = parseInt(btn.dataset.index);
       const card = btn.closest('.card');
       const imgData = card ? card._imgData : null;
       if (imgData) {
-        btn.classList.toggle('saved', isSaved(imgData));
-        btn.title = isSaved(imgData) ? t('bookmarkSaved') : t('bookmark');
+        const saved = isSaved(imgData);
+        btn.classList.toggle('saved', saved);
+        btn.title = saved ? t('bookmarkSaved') : t('bookmark');
       }
     });
   }
 
-  // Bookmark icon
-  const STAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  // Ribbon icon (liston)
+  const RIBBON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+
+  // ── mark viewed ──────────────────────────────
+  let viewedEnabled = false;
+
+  function loadViewed() {
+    try { return JSON.parse(localStorage.getItem(VIEWED_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveViewed(arr) {
+    localStorage.setItem(VIEWED_KEY, JSON.stringify(arr));
+  }
+
+  function markViewed(url) {
+    if (!url) return;
+    const list = loadViewed();
+    if (!list.includes(url)) {
+      list.push(url);
+      saveViewed(list);
+    }
+  }
+
+  function isViewed(url) {
+    if (!viewedEnabled) return false;
+    return loadViewed().includes(url);
+  }
+
+  function applyViewedState() {
+    document.querySelectorAll('.card').forEach(card => {
+      const url = card._imgData ? (card._imgData.url || card._imgData.thumb) : '';
+      card.classList.toggle('viewed', isViewed(url));
+    });
+  }
+
+  document.getElementById('btnViewed').addEventListener('click', () => {
+    viewedEnabled = !viewedEnabled;
+    document.getElementById('btnViewed').classList.toggle('on', viewedEnabled);
+    document.getElementById('viewedBtnText').textContent = viewedEnabled ? t('viewedOn') : t('viewedLabel');
+    applyViewedState();
+  });
 
   // ── random terms ─────────────────────────────
   const RANDOM_TERMS = [
@@ -866,7 +910,6 @@ body{
   let totalResults = 0;
   let showing = 0;
   let loading = false;
-  // source-specific pagination state
   let srcPage = { openverse: 1, wikimedia: 1 };
 
   const $ = id => document.getElementById(id);
@@ -885,7 +928,7 @@ body{
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
     link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
     dl:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-    star: STAR_ICON,
+    star: RIBBON_ICON,
   };
 
   document.getElementById('langEn').addEventListener('click', () => setLang('en'));
@@ -913,7 +956,6 @@ body{
   btnRandom.addEventListener('click', () => {
     const words = RANDOM_TERMS;
     const single = words[Math.floor(Math.random() * words.length)];
-    // 50% single word, 50% two words
     const term = Math.random() < 0.5
       ? single
       : single + ' ' + words[Math.floor(Math.random() * words.length)];
@@ -933,19 +975,12 @@ body{
     const data = await res.json();
     return {
       results: (data.results || []).map(img => ({
-        type: 'openverse',
-        title: img.title || '',
-        thumb: img.url || img.thumbnail || '',
-        url: img.url || '',
-        pageUrl: img.foreign_landing_url || '',
-        author: img.creator || '',
-        authUrl: img.creator_url || '',
-        provider: img.provider || '',
-        license: img.license || '',
-        licVer: img.license_version || '',
+        type: 'openverse', title: img.title || '', thumb: img.url || img.thumbnail || '',
+        url: img.url || '', pageUrl: img.foreign_landing_url || '',
+        author: img.creator || '', authUrl: img.creator_url || '',
+        provider: img.provider || '', license: img.license || '', licVer: img.license_version || '',
       })),
-      total: data.result_count || 0,
-      page: page,
+      total: data.result_count || 0, page: page,
     };
   }
 
@@ -953,15 +988,10 @@ body{
     const perPage = PER_PAGE;
     const offset = (page - 1) * perPage;
 
-    // Step 1: search for files
     const searchParams = new URLSearchParams({
-      action: 'query', list: 'search',
-      srnamespace: '6',
-      srsearch: query,
-      srlimit: String(perPage),
-      sroffset: String(offset),
-      format: 'json',
-      origin: '*',
+      action: 'query', list: 'search', srnamespace: '6',
+      srsearch: query, srlimit: String(perPage), sroffset: String(offset),
+      format: 'json', origin: '*',
     });
     const searchRes = await fetch('https://commons.wikimedia.org/w/api.php?' + searchParams, {
       headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0 (https://github.com/juanaustral/freelicense-image-finder)' }
@@ -973,14 +1003,10 @@ body{
     const total = searchData.query?.searchinfo?.totalhits || 0;
     if (hits.length === 0) return { results: [], total: 0, page: page };
 
-    // Step 2: get image info (URL, license, author)
     const titles = hits.map(h => h.title).join('|');
     const infoParams = new URLSearchParams({
-      action: 'query', prop: 'imageinfo',
-      iiprop: 'url|extmetadata',
-      titles: titles,
-      format: 'json',
-      origin: '*',
+      action: 'query', prop: 'imageinfo', iiprop: 'url|extmetadata',
+      titles: titles, format: 'json', origin: '*',
     });
     const infoRes = await fetch('https://commons.wikimedia.org/w/api.php?' + infoParams, {
       headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0' }
@@ -992,51 +1018,31 @@ body{
     const results = [];
 
     for (const hit of hits) {
-      const pageId = Object.keys(pages).find(pid => {
-        const p = pages[pid];
-        return p.title === hit.title;
-      });
+      const pageId = Object.keys(pages).find(pid => pages[pid].title === hit.title);
       if (!pageId) continue;
       const pg = pages[pageId];
       if (!pg.imageinfo || !pg.imageinfo[0]) continue;
       const ii = pg.imageinfo[0];
       const meta = ii.extmetadata || {};
-
       const licShort = (meta.LicenseShortName?.value || '').toLowerCase();
       const copyrighted = (meta.Copyrighted?.value || '').toLowerCase();
-
-      // Filter by license: CC0 or Public Domain
       const isCC0 = licShort.includes('cc0') || licShort.includes('cc 0');
       const isPD = licShort.includes('public domain') || copyrighted === 'false' || licShort.includes('pdm');
-
       if (activeFilter === 'cc0' && !isCC0) continue;
       if (activeFilter === 'pdm' && !isPD) continue;
       if (activeFilter === 'cc0,pdm' && !isCC0 && !isPD) continue;
 
       const artist = meta.Artist?.value || '';
-      const artistPlain = artist.replace(/<[^>]*>/g, '').trim();
-
       results.push({
         type: 'wikimedia',
         title: meta.ObjectName?.value || meta.ImageDescription?.value || hit.title.replace(/^File:/,'').replace(/\.\w+$/,''),
-        thumb: ii.url,
-        url: ii.url,
-        pageUrl: ii.descriptionurl,
-        author: artistPlain,
+        thumb: ii.url, url: ii.url, pageUrl: ii.descriptionurl,
+        author: artist.replace(/<[^>]*>/g, '').trim(),
         authUrl: artist.includes('href=') ? (artist.match(/href="([^"]+)"/) || ['',''])[1] : '',
-        provider: 'Wikimedia',
-        license: meta.LicenseShortName?.value || '',
-        licVer: '',
-        wikimedia: true,
+        provider: 'Wikimedia', license: meta.LicenseShortName?.value || '', licVer: '',
       });
     }
-
-    return {
-      results: results,
-      total: total,
-      page: page,
-      filtered: results.length < hits.length,
-    };
+    return { results: results, total: total, page: page, filtered: results.length < hits.length };
   }
 
   // ── main search ──────────────────────────────
@@ -1090,9 +1096,8 @@ body{
       }
 
       if (allResults.length === 0 && !append) {
-        const noRes = t('noRes');
-        empty.innerHTML = `<p>${noRes} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>` +
-          (errors.length ? `<p style="font-size:11px;color:#a8a29e;margin-top:8px">${errors.join('; ')}</p>` : '');
+        empty.innerHTML = '<p>' + t('noRes') + ' <strong>' + esc(query) + '</strong>.</p><p style="font-size:12px">' + t('try') + '</p>' +
+          (errors.length ? '<p style="font-size:11px;color:#a8a29e;margin-top:8px">' + errors.join('; ') + '</p>' : '');
         empty.style.display = 'block';
         info.textContent = '';
         return;
@@ -1103,7 +1108,6 @@ body{
       totalResults = maxTotal;
       updateInfo();
 
-      // Show "load more" if we got results
       const gotAll = allResults.length < PER_PAGE;
       const hasMore = activeSource === 'all' ? !gotAll : showing < maxTotal;
       loadWrap.style.display = (hasMore && allResults.length > 0) ? 'block' : 'none';
@@ -1112,7 +1116,7 @@ body{
       info.textContent = t('err');
       console.error(err);
       if (!append) {
-        empty.innerHTML = `<p>${t('err')}</p>`;
+        empty.innerHTML = '<p>' + t('err') + '</p>';
         empty.style.display = 'block';
       }
     } finally {
@@ -1125,14 +1129,13 @@ body{
   function updateInfo() {
     const licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
     const srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
-    info.textContent = `${showing} ${t('of')} ${totalResults} ${t('results')} "${esc(currentQuery)}"` +
-      (licLabel ? ` · ${licLabel}` : '') +
-      ` · ${srcLabel}`;
+    info.textContent = showing + ' ' + t('of') + ' ' + totalResults + ' ' + t('results') + ' "' + esc(currentQuery) + '"' +
+      (licLabel ? ' · ' + licLabel : '') + ' · ' + srcLabel;
   }
 
   function render(hits, append) {
     const frag = document.createDocumentFragment();
-    hits.forEach((img, idx) => {
+    hits.forEach(img => {
       const title   = img.title || 'Sin título';
       const thumb   = img.thumb || '';
       const author  = img.author || '';
@@ -1140,13 +1143,17 @@ body{
       const prov    = img.provider || '';
       const license = img.license || '';
       const licVer  = img.licVer || '';
-      const licStr  = license ? `${license.toUpperCase()} ${licVer}`.trim() : 'Libre';
+      const licStr  = license ? license.toUpperCase() + ' ' + licVer : 'Libre';
       const pageUrl = img.pageUrl || '';
       const imgUrl  = img.url || '';
 
       const card = document.createElement('div');
       card.className = 'card';
-      card._imgData = img; // store for bookmark
+      card._imgData = img;
+
+      // Mark viewed on page load if active
+      const viewUrl = imgUrl || thumb;
+      if (viewedEnabled && isViewed(viewUrl)) card.classList.add('viewed');
 
       const imgDiv = document.createElement('div');
       imgDiv.className = 'card-img';
@@ -1154,7 +1161,14 @@ body{
       elImg.src = thumb;
       elImg.alt = title;
       elImg.loading = 'lazy';
-      if (imgUrl) imgDiv.addEventListener('click', () => window.open(imgUrl, '_blank'));
+      if (imgUrl) imgDiv.addEventListener('click', () => {
+        // Mark as viewed when clicked
+        if (viewedEnabled) {
+          markViewed(imgUrl || thumb);
+          card.classList.add('viewed');
+        }
+        window.open(imgUrl, '_blank');
+      });
       imgDiv.appendChild(elImg);
 
       const foot = document.createElement('div');
@@ -1165,28 +1179,24 @@ body{
       const authorSpan = document.createElement('span');
       authorSpan.className = 'author';
       if (author && authUrl) {
-        authorSpan.innerHTML = `<a href="${escAttr(authUrl)}" target="_blank" rel="noopener">${esc(author)}</a>`;
+        authorSpan.innerHTML = '<a href="' + escAttr(authUrl) + '" target="_blank" rel="noopener">' + esc(author) + '</a>';
       } else if (author) {
         authorSpan.textContent = author;
       }
       const licSpan = document.createElement('span');
       licSpan.className = 'license';
-      licSpan.textContent = licStr + (prov ? ` · ${prov}` : '');
-
+      licSpan.textContent = licStr + (prov ? ' · ' + prov : '');
       meta.appendChild(authorSpan);
       meta.appendChild(licSpan);
 
       const actions = document.createElement('div');
       actions.className = 'card-actions';
+
       // Bookmark button
       const saved = isSaved(img);
-      const bmBtn = btnAction(ICONS.star, saved ? t('bookmarkSaved') : t('bookmark'), () => {
-        const result = toggleSave(img, 'Favorites');
-        if (result.action === 'saved') {
-          showToast(t('toastSaved'));
-        } else {
-          showToast(t('toastRemoved'));
-        }
+      const bmBtn = btnAction(ICONS.star, saved ? t('bookmarkSaved') : t('bookmark'), function() {
+        const res = toggleSave(img, 'Favorites');
+        showToast(res.action === 'saved' ? t('toastSaved') : t('toastRemoved'));
         updateAlbumsButton();
         refreshBookmarks();
       });
@@ -1194,11 +1204,11 @@ body{
       if (saved) bmBtn.classList.add('saved');
       actions.appendChild(bmBtn);
 
-      if (pageUrl) actions.appendChild(btnAction(ICONS.eye, t('btnView'), () => window.open(pageUrl, '_blank')));
-      if (imgUrl)  actions.appendChild(btnAction(ICONS.link, t('btnLink'), () => window.open(imgUrl, '_blank')));
+      if (pageUrl) actions.appendChild(btnAction(ICONS.eye, t('btnView'), function() { window.open(pageUrl, '_blank'); }));
       if (imgUrl) {
+        actions.appendChild(btnAction(ICONS.link, t('btnLink'), function() { window.open(imgUrl, '_blank'); }));
         const fname = title.replace(/[^a-z0-9_\-]/gi,'_').substring(0,40) + '.jpg';
-        actions.appendChild(btnAction(ICONS.dl, t('btnDl'), () => downloadImg(imgUrl, fname)));
+        actions.appendChild(btnAction(ICONS.dl, t('btnDl'), function() { downloadImg(imgUrl, fname); }));
       }
 
       foot.appendChild(meta);
@@ -1215,7 +1225,7 @@ body{
     btn.className = 'action-btn';
     btn.title = title;
     btn.innerHTML = svg;
-    btn.addEventListener('click', e => { e.stopPropagation(); onclick(); });
+    btn.addEventListener('click', function(e) { e.stopPropagation(); onclick(); });
     return btn;
   }
 
@@ -1232,7 +1242,7 @@ body{
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
     } catch {
       window.open(url, '_blank');
     }
@@ -1249,20 +1259,18 @@ body{
     return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  const doSearch = () => {
+  const doSearch = function() {
     currentPage = 1;
     srcPage = { openverse: 1, wikimedia: 1 };
     search(queryEl.value, 1, false);
   };
-  const loadMore = () => search(currentQuery, currentPage + 1, true);
+  const loadMore = function() { search(currentQuery, currentPage + 1, true); };
 
   btnSearch.addEventListener('click', doSearch);
-  queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  queryEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
   btnLoad.addEventListener('click', loadMore);
 
-  // Init albums button state
   updateAlbumsButton();
-
   queryEl.focus();
 })();
 </script>
