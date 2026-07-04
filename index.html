@@ -7,7 +7,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f8f6f3;
+  --bg:#f5f3f0;
   --surface:#fff;
   --text:#1c1917;
   --text-dim:#78716c;
@@ -35,36 +35,70 @@ body{
 
 /* ── header ───────────────────────────────── */
 .header{
-  background:linear-gradient(135deg,#fdfbfa 0%,#f8f6f3 100%);
-  border-bottom:1px solid var(--border);
-  padding:24px 0 18px;margin-bottom:22px;
   position:relative;
+  padding:28px 0 20px;margin-bottom:22px;
+  background:linear-gradient(135deg,#fdfcfa 0%,#e8f5f3 50%,#fdfcfa 100%);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),#14b8a6,#2dd4bf,var(--accent));
+  opacity:.6;
 }
 .header::after{
-  content:'';position:absolute;bottom:-1px;left:10%;right:10%;
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  opacity:.25;
+  content:'';position:absolute;top:-60%;right:-8%;
+  width:280px;height:280px;
+  background:radial-gradient(circle,rgba(13,148,136,.06) 0%,transparent 70%);
+  border-radius:50%;
+  pointer-events:none;
 }
 .header-inner{
   display:flex;align-items:flex-start;justify-content:space-between;
   max-width:var(--max-w);margin:0 auto;padding:0 var(--gap);
+  position:relative;z-index:1;
 }
-.header-left{flex:1}
-.header-brand{display:flex;align-items:center;gap:10px;margin-bottom:1px}
+.header-left{flex:1;min-width:0}
+.header-brand{display:flex;align-items:center;gap:12px;margin-bottom:4px}
 .header-brand .mark{
-  width:28px;height:28px;border-radius:7px;
+  width:32px;height:32px;border-radius:8px;
   background:linear-gradient(135deg,var(--accent),#14b8a6);
   display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-weight:700;flex-shrink:0;
+  color:#fff;font-size:15px;font-weight:700;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(13,148,136,.2);
 }
-.header-title{font-size:20px;font-weight:700;letter-spacing:-.025em;color:var(--text)}
-.header-sub{font-size:12px;color:var(--text-dim);margin-top:1px;margin-left:38px}
-.header-sub a{color:var(--accent);text-decoration:none;font-weight:500}
-.header-sub a:hover{color:var(--accent-hover)}
+.header-title{font-size:21px;font-weight:700;letter-spacing:-.03em;color:var(--text)}
+.header-sub{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  margin-top:3px;margin-left:44px;
+}
+.header-sub .credit-label{
+  font-size:11px;color:var(--text-dim);font-weight:400;
+  letter-spacing:.02em;text-transform:uppercase;
+}
+.header-sub .credit-name{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px 3px 8px;
+  background:var(--surface);
+  border:1px solid var(--accent-border);
+  border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--accent);
+  text-decoration:none;
+  transition:all .2s;
+  box-shadow:0 1px 3px rgba(13,148,136,.08);
+}
+.header-sub .credit-name:hover{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+  box-shadow:0 2px 10px rgba(13,148,136,.25);
+  transform:translateY(-1px);
+}
+.header-sub .credit-name svg{width:12px;height:12px;flex-shrink:0;transition:transform .2s}
+.header-sub .credit-name:hover svg{transform:translate(1px,-1px)}
 
 /* lang toggle */
-.lang-switch{display:flex;gap:2px;background:var(--border);border-radius:6px;padding:2px;flex-shrink:0;margin-top:3px}
+.lang-switch{display:flex;gap:2px;background:var(--border);border-radius:6px;padding:2px;flex-shrink:0;margin-top:5px}
 .lang-btn{
   padding:4px 11px;border:none;border-radius:5px;font-size:11px;font-weight:600;
   cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s;
@@ -77,7 +111,7 @@ body{
   background:var(--accent-light);border:1px solid var(--accent-border);
   border-radius:var(--radius-sm);padding:9px 13px;
   font-size:12px;color:var(--text-dim);line-height:1.55;
-  margin-bottom:16px;display:flex;align-items:center;gap:7px;
+  margin-bottom:14px;display:flex;align-items:center;gap:7px;
 }
 .tip .tip-icon{
   width:32px;height:32px;border-radius:50%;
@@ -92,7 +126,7 @@ body{
 }
 
 /* ── search ───────────────────────────────── */
-.search-row{display:flex;gap:6px;margin-bottom:13px}
+.search-row{display:flex;gap:6px;margin-bottom:10px}
 .search-row input[type=text]{
   flex:1;padding:11px 15px;border:1px solid var(--border);border-radius:var(--radius-sm);
   font-size:14px;background:var(--surface);outline:none;
@@ -103,13 +137,37 @@ body{
   box-shadow:0 0 0 3px var(--accent-glow);
 }
 .search-row button{
-  padding:11px 24px;background:var(--accent);color:#fff;border:none;
+  padding:11px 18px;background:var(--accent);color:#fff;border:none;
   border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;
   transition:background .2s,transform .1s;white-space:nowrap;font-family:inherit;
 }
 .search-row button:hover{background:var(--accent-hover);transform:translateY(-1px)}
 .search-row button:active{transform:translateY(0)}
 .search-row button:disabled{opacity:.5;cursor:default;transform:none}
+
+.btn-random{
+  background:var(--surface) !important;
+  color:var(--text-dim) !important;
+  border:1px solid var(--border) !important;
+  font-size:16px !important;line-height:1;padding:11px 14px !important;
+}
+.btn-random:hover{
+  border-color:var(--accent) !important;
+  color:var(--accent) !important;
+  background:var(--accent-light) !important;
+}
+.btn-random svg{width:16px;height:16px;display:block}
+
+/* ── source chips ─────────────────────────── */
+.source-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.source-label{font-size:11px;color:var(--text-muted);display:flex;align-items:center;padding-right:4px;font-weight:500;letter-spacing:.02em}
+.source-chip{
+  padding:4px 12px;border:1px solid var(--border);border-radius:20px;
+  font-size:11px;font-weight:600;cursor:pointer;background:var(--surface);
+  color:var(--text-dim);transition:all .18s;user-select:none;font-family:inherit;
+}
+.source-chip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.source-chip:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ── filters ──────────────────────────────── */
 .filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:17px}
@@ -219,8 +277,10 @@ body{
   .header-inner{flex-direction:column;gap:8px}
   .lang-switch{align-self:flex-end}
   .gallery{grid-template-columns:repeat(2,1fr);gap:10px}
-  .search-row{flex-direction:column}
+  .search-row{flex-wrap:wrap}
+  .search-row input[type=text]{min-width:100%}
   .header-sub{margin-left:0}
+  .header-sub .credit-name{margin-top:2px}
 }
 </style>
 </head>
@@ -234,8 +294,11 @@ body{
         <span class="header-title" id="siteTitle">FreeLicense Image Finder</span>
       </div>
       <div class="header-sub">
-        <span id="siteSub">Developed by</span>
-        <a href="https://juanmartinezgarcia.com" target="_blank" rel="noopener">Juan Martinez Garcia</a>
+        <span class="credit-label" id="developedBy">Developed by</span>
+        <a class="credit-name" href="https://juanmartinezgarcia.com" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Juan Martinez Garcia
+        </a>
       </div>
     </div>
     <div class="lang-switch">
@@ -261,6 +324,16 @@ body{
   <div class="search-row">
     <input type="text" id="query" placeholder="mountains, office, textures, cats…" autofocus>
     <button id="btnSearch">Search</button>
+    <button class="btn-random" id="btnRandom" title="Random search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+    </button>
+  </div>
+
+  <div class="source-row" id="sourceRow">
+    <span class="source-label" id="sourceLabel">Source:</span>
+    <span class="source-chip active" data-source="openverse" id="srcOpenverse">Openverse</span>
+    <span class="source-chip" data-source="wikimedia" id="srcWikimedia">Wikimedia Commons</span>
+    <span class="source-chip" data-source="all" id="srcAll">All Sources</span>
   </div>
 
   <div class="filters" id="filters">
@@ -292,10 +365,15 @@ body{
   const I18N = {
     en: {
       title: 'FreeLicense Image Finder',
-      sub:   'Developed by',
+      sub:   'Desarrollado por',
       tip:   '<strong>Click</strong> any image to open it in full resolution &middot; Use <code>👁</code> <code>🔗</code> <code>⬇</code> to view the source page, open the direct URL, or download',
       ph:    'mountains, office, textures, cats…',
       search:'Search',
+      randomTitle:'Random search',
+      srcLabel:'Source:',
+      srcOpenverse:'Openverse',
+      srcWikimedia:'Wikimedia Commons',
+      srcAll:'All Sources',
       pd:    'Public Domain',
       both:  'Both',
       load:  '+ Load more',
@@ -317,6 +395,11 @@ body{
       tip:   '<strong>Click</strong> en cualquier imagen para abrirla en resolución completa &middot; Usá <code>👁</code> <code>🔗</code> <code>⬇</code> para ver la página de origen, ir a la URL directa o descargar',
       ph:    'montañas, oficina, texturas, gatos…',
       search:'Buscar',
+      randomTitle:'Búsqueda aleatoria',
+      srcLabel:'Fuente:',
+      srcOpenverse:'Openverse',
+      srcWikimedia:'Wikimedia Commons',
+      srcAll:'Todas las fuentes',
       pd:    'Dominio público',
       both:  'Ambos',
       load:  '+ Cargar más',
@@ -342,10 +425,15 @@ body{
     lang = code;
     document.documentElement.lang = code;
     document.getElementById('siteTitle').textContent = t('title');
-    document.getElementById('siteSub').textContent = t('sub');
+    document.getElementById('developedBy').textContent = t('sub');
     document.getElementById('tipText').innerHTML = t('tip');
     document.getElementById('query').placeholder = t('ph');
     document.getElementById('btnSearch').textContent = t('search');
+    document.getElementById('btnRandom').title = t('randomTitle');
+    document.getElementById('sourceLabel').textContent = t('srcLabel');
+    document.getElementById('srcOpenverse').textContent = t('srcOpenverse');
+    document.getElementById('srcWikimedia').textContent = t('srcWikimedia');
+    document.getElementById('srcAll').textContent = t('srcAll');
     document.getElementById('chipPd').textContent = t('pd');
     document.getElementById('chipBoth').textContent = t('both');
     document.getElementById('loadLabel').textContent = t('load');
@@ -355,16 +443,35 @@ body{
     if (currentQuery) updateInfo();
   }
 
+  // ── random terms ─────────────────────────────
+  const RANDOM_TERMS = [
+    'portrait','landscape','architecture','nature','abstract',
+    'city','ocean','forest','sunset','flowers',
+    'texture','pattern','wildlife','space','technology',
+    'travel','food','art','vintage','minimal',
+    'mountain','lake','sky','street','night',
+    'water','desert','snow','garden','road',
+    'bird','dog','cat','horse','color',
+    'gold','light','shadow','wood','stone',
+    'glass','metal','paper','wave','rust',
+    'winter','spring','summer','autumn','fog',
+    'fire','ice','wind','earth','cloud',
+    'people','face','hands','dance','music',
+    'big','small','long','round','old',
+  ];
+
   // ── API ──────────────────────────────────────
   const PER_PAGE = 20;
-  const API = 'https://api.openverse.org/v1/images';
 
   let currentQuery = '';
   let currentPage = 1;
   let activeFilter = 'cc0';
+  let activeSource = 'openverse';
   let totalResults = 0;
   let showing = 0;
   let loading = false;
+  // source-specific pagination state
+  let srcPage = { openverse: 1, wikimedia: 1 };
 
   const $ = id => document.getElementById(id);
   const gallery = $('gallery');
@@ -373,8 +480,10 @@ body{
   const loadWrap = $('loadWrap');
   const btnLoad = $('btnLoad');
   const btnSearch = $('btnSearch');
+  const btnRandom = $('btnRandom');
   const queryEl = $('query');
   const chips = document.querySelectorAll('.chip');
+  const srcChips = document.querySelectorAll('.source-chip');
 
   const ICONS = {
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -394,6 +503,143 @@ body{
     });
   });
 
+  srcChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      srcChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeSource = chip.dataset.source;
+      if (currentQuery) doSearch();
+    });
+  });
+
+  // ── random search ────────────────────────────
+  btnRandom.addEventListener('click', () => {
+    const term = RANDOM_TERMS[Math.floor(Math.random() * RANDOM_TERMS.length)];
+    queryEl.value = term;
+    doSearch();
+  });
+
+  // ── source search implementations ────────────
+
+  async function searchOpenverse(query, page, append) {
+    const params = new URLSearchParams({
+      q: query, license: activeFilter,
+      page: String(page), page_size: String(PER_PAGE),
+    });
+    const res = await fetch('https://api.openverse.org/v1/images?' + params);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    return {
+      results: (data.results || []).map(img => ({
+        type: 'openverse',
+        title: img.title || '',
+        thumb: img.url || img.thumbnail || '',
+        url: img.url || '',
+        pageUrl: img.foreign_landing_url || '',
+        author: img.creator || '',
+        authUrl: img.creator_url || '',
+        provider: img.provider || '',
+        license: img.license || '',
+        licVer: img.license_version || '',
+      })),
+      total: data.result_count || 0,
+      page: page,
+    };
+  }
+
+  async function searchWikimedia(query, page, append) {
+    const perPage = PER_PAGE;
+    const offset = (page - 1) * perPage;
+
+    // Step 1: search for files
+    const searchParams = new URLSearchParams({
+      action: 'query', list: 'search',
+      srnamespace: '6',
+      srsearch: query,
+      srlimit: String(perPage),
+      sroffset: String(offset),
+      format: 'json',
+      origin: '*',
+    });
+    const searchRes = await fetch('https://commons.wikimedia.org/w/api.php?' + searchParams, {
+      headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0 (https://github.com/juanaustral/freelicense-image-finder)' }
+    });
+    if (!searchRes.ok) throw new Error('Wikimedia search HTTP ' + searchRes.status);
+    const searchData = await searchRes.json();
+
+    const hits = searchData.query?.search || [];
+    const total = searchData.query?.searchinfo?.totalhits || 0;
+    if (hits.length === 0) return { results: [], total: 0, page: page };
+
+    // Step 2: get image info (URL, license, author)
+    const titles = hits.map(h => h.title).join('|');
+    const infoParams = new URLSearchParams({
+      action: 'query', prop: 'imageinfo',
+      iiprop: 'url|extmetadata',
+      titles: titles,
+      format: 'json',
+      origin: '*',
+    });
+    const infoRes = await fetch('https://commons.wikimedia.org/w/api.php?' + infoParams, {
+      headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0' }
+    });
+    if (!infoRes.ok) throw new Error('Wikimedia info HTTP ' + infoRes.status);
+    const infoData = await infoRes.json();
+
+    const pages = infoData.query?.pages || {};
+    const results = [];
+
+    for (const hit of hits) {
+      const pageId = Object.keys(pages).find(pid => {
+        const p = pages[pid];
+        return p.title === hit.title;
+      });
+      if (!pageId) continue;
+      const pg = pages[pageId];
+      if (!pg.imageinfo || !pg.imageinfo[0]) continue;
+      const ii = pg.imageinfo[0];
+      const meta = ii.extmetadata || {};
+
+      const licShort = (meta.LicenseShortName?.value || '').toLowerCase();
+      const copyrighted = (meta.Copyrighted?.value || '').toLowerCase();
+
+      // Filter by license: CC0 or Public Domain
+      const isCC0 = licShort.includes('cc0') || licShort.includes('cc 0');
+      const isPD = licShort.includes('public domain') || copyrighted === 'false' || licShort.includes('pdm');
+
+      if (activeFilter === 'cc0' && !isCC0) continue;
+      if (activeFilter === 'pdm' && !isPD) continue;
+      if (activeFilter === 'cc0,pdm' && !isCC0 && !isPD) continue;
+
+      const artist = meta.Artist?.value || '';
+      const artistPlain = artist.replace(/<[^>]*>/g, '').trim();
+
+      results.push({
+        type: 'wikimedia',
+        title: meta.ObjectName?.value || meta.ImageDescription?.value || hit.title.replace(/^File:/,'').replace(/\.\w+$/,''),
+        thumb: ii.url,
+        url: ii.url,
+        pageUrl: ii.descriptionurl,
+        author: artistPlain,
+        authUrl: artist.includes('href=') ? (artist.match(/href="([^"]+)"/) || ['',''])[1] : '',
+        provider: 'Wikimedia',
+        license: meta.LicenseShortName?.value || '',
+        licVer: '',
+        // For Wikimedia, use original URL as thumbnail (no separate thumb)
+        wikimedia: true,
+      });
+    }
+
+    return {
+      results: results,
+      total: total,
+      page: page,
+      // flag if we filtered many results (for info display)
+      filtered: results.length < hits.length,
+    };
+  }
+
+  // ── main search ──────────────────────────────
   async function search(query, page, append) {
     if (!query.trim() || loading) return;
     loading = true;
@@ -407,35 +653,51 @@ body{
       loadWrap.style.display = 'none';
       empty.style.display = 'none';
       info.textContent = t('searching');
+      srcPage = { openverse: 1, wikimedia: 1 };
     }
 
     btnLoad.classList.add('loading');
 
     try {
-      const params = new URLSearchParams({
-        q: query, license: activeFilter,
-        page: String(page), page_size: String(PER_PAGE),
-      });
-      const res = await fetch(`${API}?${params}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      let allResults = [];
+      let maxTotal = 0;
+      let srcInfo = '';
 
-      totalResults = data.result_count || 0;
-      const hits = data.results || [];
+      if (activeSource === 'openverse' || activeSource === 'all') {
+        const ovPage = activeSource === 'all' ? srcPage.openverse : page;
+        const ov = await searchOpenverse(query, ovPage, append);
+        allResults = allResults.concat(ov.results);
+        maxTotal += ov.total;
+        if (activeSource === 'all') srcPage.openverse++;
+        srcInfo = 'Openverse';
+      }
 
-      if (hits.length === 0 && !append) {
-        empty.innerHTML = `<p>${t('noRes')} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>`;
+      if (activeSource === 'wikimedia' || activeSource === 'all') {
+        const wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
+        const wm = await searchWikimedia(query, wmPage, append);
+        allResults = allResults.concat(wm.results);
+        maxTotal += wm.total;
+        if (activeSource === 'all') srcPage.wikimedia++;
+        srcInfo = srcInfo ? srcInfo + ' + Commons' : 'Wikimedia Commons';
+      }
+
+      if (allResults.length === 0 && !append) {
+        const noRes = t('noRes');
+        empty.innerHTML = `<p>${noRes} <strong>${esc(query)}</strong>.</p><p style="font-size:12px">${t('try')}</p>`;
         empty.style.display = 'block';
         info.textContent = '';
         return;
       }
 
-      render(hits, append);
+      render(allResults, append);
       showing = gallery.children.length;
+      totalResults = maxTotal;
       updateInfo();
 
-      const hasMore = showing < totalResults;
-      loadWrap.style.display = hasMore ? 'block' : 'none';
+      // Show "load more" if we got results
+      const gotAll = allResults.length < PER_PAGE;
+      const hasMore = activeSource === 'all' ? !gotAll : showing < maxTotal;
+      loadWrap.style.display = (hasMore && allResults.length > 0) ? 'block' : 'none';
 
     } catch (err) {
       info.textContent = t('err');
@@ -453,22 +715,24 @@ body{
 
   function updateInfo() {
     const licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
+    const srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
     info.textContent = `${showing} ${t('of')} ${totalResults} ${t('results')} "${esc(currentQuery)}"` +
-      (licLabel ? ` · ${licLabel}` : '');
+      (licLabel ? ` · ${licLabel}` : '') +
+      ` · ${srcLabel}`;
   }
 
   function render(hits, append) {
     const frag = document.createDocumentFragment();
     hits.forEach(img => {
       const title   = img.title || 'Sin título';
-      const thumb   = img.url || img.thumbnail || '';
-      const author  = img.creator || '';
-      const authUrl = img.creator_url || '';
+      const thumb   = img.thumb || '';
+      const author  = img.author || '';
+      const authUrl = img.authUrl || '';
       const prov    = img.provider || '';
       const license = img.license || '';
-      const licVer  = img.license_version || '';
+      const licVer  = img.licVer || '';
       const licStr  = license ? `${license.toUpperCase()} ${licVer}`.trim() : 'Libre';
-      const pageUrl = img.foreign_landing_url || '';
+      const pageUrl = img.pageUrl || '';
       const imgUrl  = img.url || '';
 
       const card = document.createElement('div');
@@ -491,13 +755,14 @@ body{
       const authorSpan = document.createElement('span');
       authorSpan.className = 'author';
       if (author && authUrl) {
-        authorSpan.innerHTML = `<a href="${authUrl}" target="_blank" rel="noopener">${esc(author)}</a>`;
+        authorSpan.innerHTML = `<a href="${escAttr(authUrl)}" target="_blank" rel="noopener">${esc(author)}</a>`;
       } else if (author) {
         authorSpan.textContent = author;
       }
       const licSpan = document.createElement('span');
       licSpan.className = 'license';
       licSpan.textContent = licStr + (prov ? ` · ${prov}` : '');
+
       meta.appendChild(authorSpan);
       meta.appendChild(licSpan);
 
@@ -554,7 +819,15 @@ body{
     return d.innerHTML;
   }
 
-  const doSearch = () => { currentPage = 1; search(queryEl.value, 1, false); };
+  function escAttr(str) {
+    return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  const doSearch = () => {
+    currentPage = 1;
+    srcPage = { openverse: 1, wikimedia: 1 };
+    search(queryEl.value, 1, false);
+  };
   const loadMore = () => search(currentQuery, currentPage + 1, true);
 
   btnSearch.addEventListener('click', doSearch);
