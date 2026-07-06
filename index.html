@@ -18,6 +18,7 @@
   --accent-border:#99f6e4;
   --accent-glow:rgba(13,148,136,.12);
   --border:#e7e5e4;
+  --card-bg:#f0eeeb;
   --radius-sm:8px;
   --radius:10px;
   --radius-lg:16px;
@@ -26,6 +27,23 @@
   --shadow:0 1px 3px rgba(0,0,0,.05);
   --shadow-hover:0 6px 20px rgba(0,0,0,.07);
   --font:400 14px/1.6 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#121212;
+  --surface:#1e1e1e;
+  --text:#e4e0db;
+  --text-dim:#9e9a96;
+  --text-muted:#6b6764;
+  --accent:#2dd4bf;
+  --accent-hover:#5eead4;
+  --accent-light:rgba(45,212,191,.1);
+  --accent-border:rgba(45,212,191,.25);
+  --accent-glow:rgba(45,212,191,.08);
+  --border:#2a2a2a;
+  --card-bg:#181818;
+  --shadow:0 1px 3px rgba(0,0,0,.2);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.35);
+  --header-bg:linear-gradient(135deg,#1a1a1a 0%,#1e2a28 50%,#1a1a1a 100%);
 }
 body{
   font:var(--font);color:var(--text);
@@ -37,7 +55,7 @@ body{
 .header{
   position:relative;
   padding:28px 0 20px;margin-bottom:22px;
-  background:linear-gradient(135deg,#fdfcfa 0%,#e8f5f3 50%,#fdfcfa 100%);
+  background:var(--header-bg,linear-gradient(135deg,#fdfcfa 0%,#e8f5f3 50%,#fdfcfa 100%));
   border-bottom:1px solid var(--border);
   overflow:hidden;
 }
@@ -105,6 +123,17 @@ body{
   font-family:inherit;
 }
 .lang-btn.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+/* dark mode toggle */
+.theme-switch{display:flex;align-items:center;margin-top:5px}
+.theme-btn{
+  width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;
+  background:var(--surface);color:var(--text-dim);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;font-size:13px;font-family:inherit;flex-shrink:0;
+}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.header-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:5px}
 
 /* ── tip ──────────────────────────────────── */
 .tip{
@@ -223,7 +252,7 @@ body{
 .card-img{
   aspect-ratio:4/3;overflow:hidden;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  background:#f0eeeb;position:relative;
+  background:var(--card-bg);position:relative;
 }
 .card-img::after{
   content:'↗';position:absolute;top:8px;right:8px;
@@ -433,9 +462,14 @@ body{
         </a>
       </div>
     </div>
-    <div class="lang-switch">
-      <button class="lang-btn active" data-lang="en" id="langEn">EN</button>
-      <button class="lang-btn" data-lang="es" id="langEs">ES</button>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button class="theme-btn" id="themeBtn" title="Dark mode">🌙</button>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn active" data-lang="en" id="langEn">EN</button>
+        <button class="lang-btn" data-lang="es" id="langEs">ES</button>
+      </div>
     </div>
   </div>
 </header>
@@ -499,7 +533,7 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.6.0</span>
+      <span class="fv-num" id="versionNum">v1.7.0</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
@@ -581,6 +615,8 @@ body{
       viewedOn:'Mark Viewed ON',
       viewedOff:'Mark Viewed OFF',
       albumEmptyLabel:'No images yet',
+      darkMode:'Dark mode',
+      lightMode:'Light mode',
     },
     es: {
       title: 'FreeLicense Image Finder',
@@ -627,6 +663,8 @@ body{
       viewedOn:'Marcar Vistas ON',
       viewedOff:'Marcar Vistas OFF',
       albumEmptyLabel:'Sin imagenes',
+      darkMode:'Modo oscuro',
+      lightMode:'Modo claro',
     }
   };
 
@@ -662,8 +700,9 @@ body{
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.6.0';
+  const VERSION = 'v1.7.0';
   const CHANGELOG = [
+    {v:'1.7.0', date:'2026-07-06', text:'Dark mode con toggle persistente en localStorage.'},
     {v:'1.6.0', date:'2026-07-04', text:'Album selector al guardar. Albumes vacios visibles en modal. Nueva album con prompt funcional.'},
     {v:'1.5.0', date:'2026-07-04', text:'Ribbon icon, Mark Viewed toggle, New Album fix.'},
     {v:'1.4.0', date:'2026-07-04', text:'Albumes locales: guardar imagenes en Favoritos con localStorage.'},
@@ -678,7 +717,7 @@ body{
     const overlay = document.getElementById('modalOverlay');
     const body = document.getElementById('modalBody');
     body.innerHTML = CHANGELOG.map(e => {
-      var cls = e.v === '1.6.0' ? ' style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"' : '';
+      var cls = e.v === '1.7.0' ? ' style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"' : '';
       return '<div class="cl-entry"><div class="cl-version"' + cls + '>v' + e.v + '</div><div class="cl-body"><div class="cl-date">' + e.date + '</div><div class="cl-text">' + e.text + '</div></div></div>';
     }).join('');
     overlay.classList.add('open');
@@ -1041,6 +1080,36 @@ body{
 
   document.getElementById('langEn').addEventListener('click', function() { setLang('en'); });
   document.getElementById('langEs').addEventListener('click', function() { setLang('es'); });
+
+  // ── dark mode ─────────────────────────────────
+  const THEME_KEY = 'flif_theme';
+  function getTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+  }
+  function setTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : '');
+    try { localStorage.setItem(THEME_KEY, mode === 'dark' ? 'dark' : 'light'); } catch {}
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = mode === 'dark' ? '☀️' : '🌙';
+    btn.title = mode === 'dark' ? t('lightMode') : t('darkMode');
+  }
+  // Apply saved theme
+  var savedTheme = getTheme();
+  if (savedTheme === 'dark') setTheme('dark');
+  else setTheme('light');
+
+  document.getElementById('themeBtn').addEventListener('click', function() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    setTheme(isDark ? 'light' : 'dark');
+  });
+
+  // Update theme button title on lang change (wrap original setLang)
+  var _origSetLang = setLang;
+  setLang = function(code) {
+    _origSetLang(code);
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.getElementById('themeBtn').title = isDark ? t('lightMode') : t('darkMode');
+  };
 
   chips.forEach(function(chip) {
     chip.addEventListener('click', function() {
