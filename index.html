@@ -232,6 +232,9 @@ body{
 
 /* info */
 .info{font-size:12px;color:var(--text-dim);margin-bottom:16px;min-height:18px}
+.info .warn{color:#b45309}
+.trans-note{font-size:12px;color:var(--text-dim);margin:-10px 0 16px}
+.trans-note button{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-decoration:underline}
 
 /* ── gallery ──────────────────────────────── */
 .gallery{
@@ -280,6 +283,8 @@ body{
 .card-meta .author a{color:var(--text);text-decoration:none}
 .card-meta .author a:hover{color:var(--accent)}
 .card-meta .license{white-space:nowrap;font-size:10px;color:var(--text-muted)}
+.card-meta .license a{color:inherit;text-decoration:underline dotted}
+.card-meta .license a:hover{color:var(--accent)}
 .card-actions{display:flex;gap:4px;position:relative}
 .action-btn{
   width:30px;height:25px;display:inline-flex;align-items:center;justify-content:center;
@@ -519,6 +524,7 @@ body{
   </div>
 
   <div class="info" id="info"></div>
+  <div class="trans-note" id="transNote" style="display:none"></div>
   <div class="gallery" id="gallery"></div>
   <div class="load-wrap" id="loadWrap" style="display:none">
     <button class="btn-load" id="btnLoad">
@@ -533,7 +539,7 @@ body{
   <div class="footer">
     <span class="fv" id="versionBadge">
       <span id="footerLabel">FreeLicense Image Finder</span>
-      <span class="fv-num" id="versionNum">v1.7.0</span>
+      <span class="fv-num" id="versionNum">v1.8.0</span>
     </span>
     <div class="dev-credit">
       <span id="footerCredit">Developed by</span>
@@ -566,6 +572,7 @@ body{
 
 <div class="toast" id="toast"></div>
 
+<script src="sources.js"></script>
 <script>
 (function(){
   // ── i18n ──────────────────────────────────────
@@ -592,9 +599,16 @@ body{
       empty: 'Type something and press <strong>Enter</strong>.',
       noRes: 'No results for',
       try:   'Try different keywords or change the license filter.',
-      of:    'of',
       results:'results for',
       err:   '⚠ Connection error. Check the console (F12).',
+      licTitle:'License declared by the source. Check the source page before using the image.',
+      translated:'Searching for',
+      translatedFrom:'translated from',
+      searchOriginal:'Search',
+      searchOriginalSuffix:'as typed',
+      rateLimit:'Openverse reached its limit for anonymous use (20 searches per minute, 200 per day). Try again later or use Wikimedia Commons.',
+      srcDown:'did not respond',
+      stillLoading:'still loading',
       searching: 'Searching…',
       changelog: 'Changelog',
       footerCredit: 'Developed by',
@@ -624,7 +638,7 @@ body{
       tip:   '<strong>Click</strong> en cualquier imagen para abrirla en resolución completa &middot; Usá <code>👁</code> <code>🔗</code> <code>⬇</code> para ver la página de origen, ir a la URL directa o descargar',
       ph:    'montañas, oficina, texturas, gatos…',
       search:'Buscar',
-      random:'Random Search',
+      random:'Búsqueda al azar',
       srcLabel:'Fuente:',
       srcOpenverse:'Openverse',
       srcWikimedia:'Wikimedia Commons',
@@ -640,9 +654,16 @@ body{
       empty: 'Escribí algo y presioná <strong>Enter</strong>.',
       noRes: 'Sin resultados para',
       try:   'Probá con otras palabras o cambiá el filtro de licencia.',
-      of:    'de',
       results:'resultados para',
       err:   '⚠ Error de conexión. Revisá la consola (F12).',
+      licTitle:'Licencia declarada por la fuente. Revisá la página de origen antes de usar la imagen.',
+      translated:'Buscando',
+      translatedFrom:'traducido de',
+      searchOriginal:'Buscar',
+      searchOriginalSuffix:'tal cual',
+      rateLimit:'Openverse llegó a su límite de uso anónimo (20 búsquedas por minuto, 200 por día). Probá más tarde o usá Wikimedia Commons.',
+      srcDown:'no respondió',
+      stillLoading:'todavía cargando',
       searching: 'Buscando…',
       changelog: 'Historial de cambios',
       footerCredit: 'Desarrollado por',
@@ -672,9 +693,12 @@ body{
 
   function t(key) { return I18N[lang][key] || key; }
 
+  const LANG_KEY = 'flif_lang';
+
   function setLang(code) {
     lang = code;
     document.documentElement.lang = code;
+    try { localStorage.setItem(LANG_KEY, code); } catch {}
     document.getElementById('siteTitle').textContent = t('title');
     document.getElementById('developedBy').textContent = t('sub');
     document.getElementById('tipText').innerHTML = t('tip');
@@ -696,12 +720,13 @@ body{
     document.getElementById('albumsTitle').textContent = t('albumsTitle');
     document.getElementById('viewedBtnText').textContent = t('viewedLabel');
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
-    if (currentQuery) updateInfo();
+    if (currentQuery) { updateInfo(); updateTransNote(); }
   }
 
   // ── changelog ────────────────────────────────
-  const VERSION = 'v1.7.0';
+  const VERSION = 'v1.8.0';
   const CHANGELOG = [
+    {v:'1.8.0', date:'2026-10-21', text:'Busqueda mas precisa: Commons filtra la licencia en el servidor (datos estructurados), solo imagenes, miniaturas livianas en ambas fuentes, sin duplicados de Commons via Openverse. Consultas en espanol traducidas al ingles. Una busqueda nueva cancela la anterior. Licencia con enlace. Aviso del limite de Openverse. Idioma segun el navegador.'},
     {v:'1.7.0', date:'2026-07-06', text:'Dark mode con toggle persistente en localStorage.'},
     {v:'1.6.0', date:'2026-07-04', text:'Album selector al guardar. Albumes vacios visibles en modal. Nueva album con prompt funcional.'},
     {v:'1.5.0', date:'2026-07-04', text:'Ribbon icon, Mark Viewed toggle, New Album fix.'},
@@ -717,7 +742,7 @@ body{
     const overlay = document.getElementById('modalOverlay');
     const body = document.getElementById('modalBody');
     body.innerHTML = CHANGELOG.map(e => {
-      var cls = e.v === '1.7.0' ? ' style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"' : '';
+      var cls = 'v' + e.v === VERSION ? ' style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"' : '';
       return '<div class="cl-entry"><div class="cl-version"' + cls + '>v' + e.v + '</div><div class="cl-body"><div class="cl-date">' + e.date + '</div><div class="cl-text">' + e.text + '</div></div></div>';
     }).join('');
     overlay.classList.add('open');
@@ -1031,33 +1056,32 @@ body{
   });
 
   // ── random terms ─────────────────────────────
+  // Concrete subjects: they return coherent results in every source.
   var RANDOM_TERMS = [
-    'portrait','landscape','architecture','nature','abstract',
-    'city','ocean','forest','sunset','flowers',
-    'texture','pattern','wildlife','space','technology',
-    'travel','food','art','vintage','minimal',
-    'mountain','lake','sky','street','night',
-    'water','desert','snow','garden','road',
-    'bird','dog','cat','horse','color',
-    'gold','light','shadow','wood','stone',
-    'glass','metal','paper','wave','rust',
-    'winter','spring','summer','autumn','fog',
-    'fire','ice','wind','earth','cloud',
-    'people','face','hands','dance','music',
-    'big','small','long','round','old',
+    'mountain','lake','waterfall','forest','desert','beach','glacier','volcano',
+    'sunset','sunrise','clouds','storm','snow','fog','rainbow','night sky',
+    'cat','dog','horse','owl','butterfly','whale','fox','bee','parrot','deer',
+    'flowers','sunflower','mushroom','autumn leaves','cactus','apple','bread','coffee',
+    'lighthouse','bridge','castle','cathedral','skyscraper','train','bicycle','sailboat',
+    'street market','library','old map','vintage car','harbor','windmill','farm','garden',
+    'portrait','hands','dancer','musician','children playing','workers',
+    'wood texture','stone wall','rust','paper texture','pattern','mosaic','stained glass',
   ];
 
   // ── API ──────────────────────────────────────
-  var PER_PAGE = 20;
-
-  var currentQuery = '';
-  var currentPage = 1;
+  var currentQuery = '';      // what the user typed
+  var effectiveQuery = '';    // what is sent to the sources (translated or not)
+  var translatedFrom = '';
   var activeFilter = 'cc0,pdm';
   var activeSource = 'all';
-  var totalResults = 0;
   var showing = 0;
   var loading = false;
-  var srcPage = { openverse: 1, wikimedia: 1 };
+  var searchSeq = 0;          // ignores responses from superseded searches
+  var controller = null;
+  var srcState = {};
+  var seenUrls = new Set();
+  var srcErrors = [];
+  var pendingSources = [];
 
   var $ = function(id) { return document.getElementById(id); };
   var gallery = $('gallery');
@@ -1131,157 +1155,164 @@ body{
 
   // ── random search ────────────────────────────
   btnRandom.addEventListener('click', function() {
-    var words = RANDOM_TERMS;
-    var single = words[Math.floor(Math.random() * words.length)];
-    var term = Math.random() < 0.5 ? single : single + ' ' + words[Math.floor(Math.random() * words.length)];
-    queryEl.value = term;
+    queryEl.value = RANDOM_TERMS[Math.floor(Math.random() * RANDOM_TERMS.length)];
     doSearch();
   });
 
-  // ── source search implementations ────────────
+  // ── search ───────────────────────────────────
+  // Search logic lives in sources.js (window.FLISources).
+  var S = window.FLISources;
 
-  async function searchOpenverse(query, page, append) {
-    var params = new URLSearchParams({
-      q: query, license: activeFilter,
-      page: String(page), page_size: String(PER_PAGE),
-    });
-    var res = await fetch('https://api.openverse.org/v1/images?' + params);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var data = await res.json();
-    return {
-      results: (data.results || []).map(function(img) { return {
-        type: 'openverse', title: img.title || '', thumb: img.url || img.thumbnail || '',
-        url: img.url || '', pageUrl: img.foreign_landing_url || '',
-        author: img.creator || '', authUrl: img.creator_url || '',
-        provider: img.provider || '', license: img.license || '', licVer: img.license_version || '',
-      }; }),
-      total: data.result_count || 0, page: page,
-    };
+  function activeSources() {
+    return activeSource === 'all' ? ['openverse', 'wikimedia'] : [activeSource];
   }
 
-  async function searchWikimedia(query, page, append) {
-    var perPage = PER_PAGE;
-    var offset = (page - 1) * perPage;
-    var searchParams = new URLSearchParams({
-      action: 'query', list: 'search', srnamespace: '6',
-      srsearch: query, srlimit: String(perPage), sroffset: String(offset),
-      format: 'json', origin: '*',
+  function fetchSource(name, signal) {
+    var st = srcState[name];
+    if (name === 'openverse') {
+      return S.searchOpenverse({ query: effectiveQuery, filter: activeFilter, page: st.page,
+        excludeWikimedia: activeSource === 'all', signal: signal })
+        .then(function(r) { st.page++; st.done = r.done || r.results.length === 0; return r.results; });
+    }
+    return S.searchCommons({ query: effectiveQuery, filter: activeFilter, offset: st.offset, signal: signal })
+      .then(function(r) { st.offset = r.nextOffset; st.done = r.done; return r.results; });
+  }
+
+  function sourceLabel(name) {
+    return name === 'openverse' ? 'Openverse' : 'Wikimedia Commons';
+  }
+
+  // Drop files already shown (the same image can come from both sources).
+  function dedupe(list) {
+    return list.filter(function(img) {
+      if (!img.url || seenUrls.has(img.url)) return false;
+      seenUrls.add(img.url);
+      return true;
     });
-    var searchRes = await fetch('https://commons.wikimedia.org/w/api.php?' + searchParams, {
-      headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0 (https://github.com/juanaustral/freelicense-image-finder)' }
-    });
-    if (!searchRes.ok) throw new Error('Wikimedia search HTTP ' + searchRes.status);
-    var searchData = await searchRes.json();
-    var hits = searchData.query?.search || [];
-    var total = searchData.query?.searchinfo?.totalhits || 0;
-    if (hits.length === 0) return { results: [], total: 0, page: page };
-    var titles = hits.map(function(h) { return h.title; }).join('|');
-    var infoParams = new URLSearchParams({
-      action: 'query', prop: 'imageinfo', iiprop: 'url|extmetadata',
-      titles: titles, format: 'json', origin: '*',
-    });
-    var infoRes = await fetch('https://commons.wikimedia.org/w/api.php?' + infoParams, {
-      headers: { 'User-Agent': 'FreeLicenseImageFinder/1.0' }
-    });
-    if (!infoRes.ok) throw new Error('Wikimedia info HTTP ' + infoRes.status);
-    var infoData = await infoRes.json();
-    var pages = infoData.query?.pages || {};
-    var results = [];
-    for (var hi = 0; hi < hits.length; hi++) {
-      var hit = hits[hi];
-      var pageId = Object.keys(pages).find(function(pid) { return pages[pid].title === hit.title; });
-      if (!pageId) continue;
-      var pg = pages[pageId];
-      if (!pg.imageinfo || !pg.imageinfo[0]) continue;
-      var ii = pg.imageinfo[0];
-      var meta = ii.extmetadata || {};
-      var licShort = (meta.LicenseShortName?.value || '').toLowerCase();
-      var copyrighted = (meta.Copyrighted?.value || '').toLowerCase();
-      var isCC0 = licShort.includes('cc0') || licShort.includes('cc 0');
-      var isPD = licShort.includes('public domain') || copyrighted === 'false' || licShort.includes('pdm');
-      if (activeFilter === 'cc0' && !isCC0) continue;
-      if (activeFilter === 'pdm' && !isPD) continue;
-      if (activeFilter === 'cc0,pdm' && !isCC0 && !isPD) continue;
-      var artist = meta.Artist?.value || '';
-      results.push({
-        type: 'wikimedia',
-        title: meta.ObjectName?.value || meta.ImageDescription?.value || hit.title.replace(/^File:/,'').replace(/\.\w+$/,''),
-        thumb: ii.url, url: ii.url, pageUrl: ii.descriptionurl,
-        author: artist.replace(/<[^>]*>/g, '').trim(),
-        authUrl: artist.includes('href=') ? (artist.match(/href="([^"]+)"/) || ['',''])[1] : '',
-        provider: 'Wikimedia', license: meta.LicenseShortName?.value || '', licVer: '',
+  }
+
+  // Openverse can take 10-15 s to answer; a slow source must not hold the page.
+  var SOURCE_TIMEOUT = 25000;
+  function withTimeout(promise) {
+    return Promise.race([promise, new Promise(function(_, reject) {
+      setTimeout(function() { var e = new Error('timeout'); e.code = 'timeout'; reject(e); }, SOURCE_TIMEOUT);
+    })]);
+  }
+
+  // Each source renders as soon as it answers.
+  async function fetchPage(seq, append) {
+    var names = activeSources().filter(function(n) { return !srcState[n].done; });
+    srcErrors = [];
+    pendingSources = names.slice();
+    await Promise.all(names.map(function(n) {
+      return withTimeout(fetchSource(n, controller.signal)).then(function(results) {
+        if (seq !== searchSeq) return;
+        var hits = dedupe(results);
+        if (hits.length) { empty.style.display = 'none'; render(hits, true); }
+      }, function(err) {
+        if (seq !== searchSeq || err.name === 'AbortError') return;
+        console.error(n + ' error:', err);
+        srcErrors.push(err.code === 'rate_limit' ? t('rateLimit') : sourceLabel(n) + ' ' + t('srcDown') + ' (' + err.message + ')');
+        srcState[n].done = true;
+      }).then(function() {
+        if (seq !== searchSeq) return;
+        pendingSources = pendingSources.filter(function(x) { return x !== n; });
+        showing = gallery.children.length;
+        if (showing) updateInfo();
       });
+    }));
+    if (seq !== searchSeq) return;
+    if (!append && showing === 0) {
+      empty.innerHTML = '<p>' + t('noRes') + ' <strong>' + esc(effectiveQuery) + '</strong>.</p><p style="font-size:12px">' + t('try') + '</p>' +
+        (srcErrors.length ? '<p style="font-size:12px;color:#b45309;margin-top:8px">' + esc(srcErrors.join(' · ')) + '</p>' : '');
+      empty.style.display = 'block';
+      info.textContent = '';
+      loadWrap.style.display = 'none';
+      return;
     }
-    return { results: results, total: total, page: page, filtered: results.length < hits.length };
+    var hasMore = activeSources().some(function(n) { return !srcState[n].done; });
+    loadWrap.style.display = hasMore ? 'block' : 'none';
   }
 
-  // ── main search ──────────────────────────────
-  async function search(query, page, append) {
-    if (!query.trim() || loading) return;
-    loading = true;
-    btnSearch.disabled = true;
-    currentQuery = query.trim();
-    currentPage = page;
-    if (!append) {
-      gallery.innerHTML = '';
-      loadWrap.style.display = 'none';
-      empty.style.display = 'none';
-      info.textContent = t('searching');
-      srcPage = { openverse: 1, wikimedia: 1 };
-    }
-    btnLoad.classList.add('loading');
+  // A new search always wins: it cancels the one in flight instead of being ignored.
+  async function search(query, opts) {
+    opts = opts || {};
+    query = query.trim();
+    if (!query) return;
+    if (controller) controller.abort();
+    controller = new AbortController();
+    var seq = ++searchSeq;
+    currentQuery = query;
+    effectiveQuery = query;
+    translatedFrom = '';
+    srcState = { openverse: { page: 1, done: false }, wikimedia: { offset: 0, done: false } };
+    seenUrls = new Set();
+    showing = 0;
+    gallery.innerHTML = '';
+    loadWrap.style.display = 'none';
+    empty.style.display = 'none';
+    info.textContent = t('searching');
+    updateTransNote();
+    setLoading(true);
     try {
-      var allResults = [];
-      var maxTotal = 0;
-      var errors = [];
-      if (activeSource === 'openverse' || activeSource === 'all') {
+      if (lang === 'es' && !opts.noTranslate) {
         try {
-          var ovPage = activeSource === 'all' ? srcPage.openverse : page;
-          var ov = await searchOpenverse(query, ovPage, append);
-          allResults = allResults.concat(ov.results);
-          maxTotal += ov.total;
-          if (activeSource === 'all') srcPage.openverse++;
-        } catch (e) { errors.push('Openverse: ' + e.message); console.error('Openverse error:', e); }
+          var en = await S.translateQuery(query, controller.signal);
+          if (seq !== searchSeq) return;
+          if (en) { effectiveQuery = en; translatedFrom = query; }
+        } catch (e) { if (e.name === 'AbortError') return; console.warn('translation skipped:', e); }
       }
-      if (activeSource === 'wikimedia' || activeSource === 'all') {
-        try {
-          var wmPage = activeSource === 'all' ? srcPage.wikimedia : page;
-          var wm = await searchWikimedia(query, wmPage, append);
-          allResults = allResults.concat(wm.results);
-          maxTotal += wm.total;
-          if (activeSource === 'all') srcPage.wikimedia++;
-        } catch (e) { errors.push('Wikimedia Commons: ' + e.message); console.error('Wikimedia error:', e); }
-      }
-      if (allResults.length === 0 && !append) {
-        empty.innerHTML = '<p>' + t('noRes') + ' <strong>' + esc(query) + '</strong>.</p><p style="font-size:12px">' + t('try') + '</p>' +
-          (errors.length ? '<p style="font-size:11px;color:#a8a29e;margin-top:8px">' + errors.join('; ') + '</p>' : '');
-        empty.style.display = 'block';
-        info.textContent = '';
-        return;
-      }
-      render(allResults, append);
-      showing = gallery.children.length;
-      totalResults = maxTotal;
-      updateInfo();
-      var gotAll = allResults.length < PER_PAGE;
-      var hasMore = activeSource === 'all' ? !gotAll : showing < maxTotal;
-      loadWrap.style.display = (hasMore && allResults.length > 0) ? 'block' : 'none';
+      updateTransNote();
+      await fetchPage(seq, false);
     } catch (err) {
-      info.textContent = t('err');
+      if (seq !== searchSeq || err.name === 'AbortError') return;
       console.error(err);
-      if (!append) { empty.innerHTML = '<p>' + t('err') + '</p>'; empty.style.display = 'block'; }
+      info.textContent = t('err');
+      empty.innerHTML = '<p>' + t('err') + '</p>';
+      empty.style.display = 'block';
     } finally {
-      loading = false;
-      btnLoad.classList.remove('loading');
-      btnSearch.disabled = false;
+      if (seq === searchSeq) setLoading(false);
     }
+  }
+
+  async function loadMore() {
+    if (loading || !currentQuery) return;
+    var seq = searchSeq;
+    setLoading(true);
+    try { await fetchPage(seq, true); }
+    catch (err) { if (err.name !== 'AbortError') { console.error(err); info.textContent = t('err'); } }
+    finally { if (seq === searchSeq) setLoading(false); }
+  }
+
+  function setLoading(on) {
+    loading = on;
+    btnLoad.classList.toggle('loading', on);
+    btnLoad.disabled = on;
   }
 
   function updateInfo() {
     var licLabel = { 'cc0':'CC0', 'pdm':t('pd'), 'cc0,pdm':'CC0 + ' + t('pd') }[activeFilter] || '';
     var srcLabel = { 'openverse':'Openverse', 'wikimedia':'Wikimedia Commons', 'all':'Openverse + Commons' }[activeSource] || '';
-    info.textContent = showing + ' ' + t('of') + ' ' + totalResults + ' ' + t('results') + ' "' + esc(currentQuery) + '"' +
-      (licLabel ? ' · ' + licLabel : '') + ' · ' + srcLabel;
+    info.textContent = showing + ' ' + t('results') + ' "' + effectiveQuery + '" · ' + licLabel + ' · ' + srcLabel +
+      (pendingSources.length ? ' · ' + t('stillLoading') + ' ' + pendingSources.map(sourceLabel).join(', ') + '…' : '');
+    if (srcErrors.length) {
+      var w = document.createElement('div');
+      w.className = 'warn';
+      w.textContent = srcErrors.join(' · ');
+      info.appendChild(w);
+    }
+  }
+
+  function updateTransNote() {
+    var note = $('transNote');
+    if (!translatedFrom) { note.style.display = 'none'; note.innerHTML = ''; return; }
+    note.innerHTML = t('translated') + ' <strong>' + esc(effectiveQuery) + '</strong> (' + t('translatedFrom') + ' «' + esc(translatedFrom) + '») · ' +
+      '<button type="button" id="btnOriginal">' + t('searchOriginal') + ' «' + esc(translatedFrom) + '» ' + t('searchOriginalSuffix') + '</button>';
+    note.style.display = 'block';
+    $('btnOriginal').addEventListener('click', function() {
+      queryEl.value = translatedFrom;
+      search(translatedFrom, { noTranslate: true });
+    });
   }
 
   function render(hits, append) {
@@ -1293,8 +1324,7 @@ body{
       var authUrl = img.authUrl || '';
       var prov    = img.provider || '';
       var license = img.license || '';
-      var licVer  = img.licVer || '';
-      var licStr  = license ? license.toUpperCase() + ' ' + licVer : 'Libre';
+      var licStr  = license === 'cc0' ? 'CC0' : license === 'pdm' ? t('pd') : (license.toUpperCase() || 'Libre');
       var pageUrl = img.pageUrl || '';
       var imgUrl  = img.url || '';
 
@@ -1311,6 +1341,11 @@ body{
       elImg.src = thumb;
       elImg.alt = title;
       elImg.loading = 'lazy';
+      // Openverse thumbnails can hit their daily quota; fall back to the original.
+      elImg.onerror = function() {
+        elImg.onerror = null;
+        if (imgUrl && elImg.src !== imgUrl) elImg.src = imgUrl;
+      };
       if (imgUrl) imgDiv.addEventListener('click', function() {
         if (viewedEnabled) {
           markViewed(imgUrl || thumb);
@@ -1334,7 +1369,19 @@ body{
       }
       var licSpan = document.createElement('span');
       licSpan.className = 'license';
-      licSpan.textContent = licStr + (prov ? ' · ' + prov : '');
+      licSpan.title = t('licTitle');
+      if (img.licenseUrl) {
+        var licLink = document.createElement('a');
+        licLink.href = img.licenseUrl;
+        licLink.target = '_blank';
+        licLink.rel = 'noopener';
+        licLink.textContent = licStr;
+        licLink.addEventListener('click', function(e) { e.stopPropagation(); });
+        licSpan.appendChild(licLink);
+      } else {
+        licSpan.appendChild(document.createTextNode(licStr));
+      }
+      if (prov) licSpan.appendChild(document.createTextNode(' · ' + prov));
       meta.appendChild(authorSpan);
       meta.appendChild(licSpan);
 
@@ -1392,7 +1439,7 @@ body{
       var res = await fetch(url, { mode: 'cors' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var blob = await res.blob();
-      var ext = blob.type === 'image/png' ? '.png' : blob.type === 'image/gif' ? '.gif' : '.jpg';
+      var ext = { 'image/png':'.png', 'image/gif':'.gif', 'image/webp':'.webp', 'image/tiff':'.tif' }[blob.type] || '.jpg';
       var name = filename.replace(/\.\w+$/, '') + ext;
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -1415,16 +1462,16 @@ body{
     return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  var doSearch = function() {
-    currentPage = 1;
-    srcPage = { openverse: 1, wikimedia: 1 };
-    search(queryEl.value, 1, false);
-  };
-  var loadMore = function() { search(currentQuery, currentPage + 1, true); };
+  var doSearch = function() { search(queryEl.value); };
 
   btnSearch.addEventListener('click', doSearch);
   queryEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
   btnLoad.addEventListener('click', loadMore);
+
+  // Language: saved choice, otherwise the browser's.
+  var savedLang = null;
+  try { savedLang = localStorage.getItem(LANG_KEY); } catch {}
+  setLang(savedLang || ((navigator.language || '').toLowerCase().indexOf('es') === 0 ? 'es' : 'en'));
 
   updateAlbumsButton();
   queryEl.focus();
